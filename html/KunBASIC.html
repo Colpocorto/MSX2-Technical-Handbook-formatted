@@ -1,0 +1,216 @@
+<h1 id="msx-basic-kun-basic-compiler">MSX-BASIC-KUN (BASIC
+COMPILER)</h1>
+<p>by J.Suzuki 1989</p>
+<p>this document &amp; samples by Sho Endo</p>
+<p>translate to english by LASP</p>
+<p>this text file typed without changes by Nestor Soriano</p>
+<p>MSX-BASIC-KUN is an incredible BASIC compiler. It will compile a
+BASIC program on memory in few seconds and execute it 15 to 100 times
+faster!! It can compile most of the statements and functions of
+MSX-BASIC and can handle strings and floating numbers. Once you see it,
+you’d feel you’d never need to learn the Z-80 machine language. Real
+time games, C.G., demo programs can be written by the ease of BASIC for
+machine language speed.</p>
+<p>
+ 
+</p>
+<h2 id="settings-general-knowledge">1. Settings &amp; General
+knowledge</h2>
+<p>This compiler is sold in Japan as a cartridge for 4500 yen. You just
+set it in a slot to use it. Also, you can found this compiler in MSX2+
+Sanyo machines, in ROM.</p>
+<p>Now you are in BASIC mode as usual, except that two commands are
+available:</p>
+<pre><code>CALL RUN
+CALL TURBO ON/OFF</code></pre>
+<p>“CALL” can be written as “_” (underscore). I will use that from now
+on.</p>
+<p><code>_RUN</code> is the command to compile and execute the entire
+program on memory. If it finds an error it will stop and yield the
+message.</p>
+<p><code>_TURBO ON</code> is the statement to define the beginning of
+the turbo block. <code>_TURBO OFF</code> is the end of the block.</p>
+<p>The turbo block is the part of the program you want to execute fast.
+When the entire program contains some uncompilable statements, you can
+define the block to be compiled using this set.</p>
+<p>EXAMPLE</p>
+<pre><code>    100 SCREEN 8:DEFINT A-Z
+    110 BLOAD&quot;PICTURE&quot;,S
+    120 _TURBO ON
+    130 FOR X=0 TO 255
+    140 LINE(X,0)-(X,211),0
+    150 NEXT X
+    160 _TURBO OFF
+    170 GOTO 170</code></pre>
+<p>This program cannot be <code>_RUN</code>, because the
+<code>BLOAD</code> is one of the commands that cannot be compiled. If
+you <code>RUN</code> this, the part lines 130 through 150 will be
+executed fast.</p>
+<p>As <code>_RUN"FILE"</code> is not supported, you have to add
+<code>_TURBO ON</code> and <code>_TURBO OFF</code> at the beginning and
+the end if you want to <code>RUN"FILE"</code> and have the effect.</p>
+<pre><code>    100 FOR I=0 TO 999
+    110 ...
+    .
+    .
+    .
+    890 &#39;END OF THE PROGRAM</code></pre>
+<p>So, this can be <code>_RUN</code> or add <code>10 _TURBO ON</code>
+and <code>900 _TURBO OFF</code> and <code>RUN"FILE"</code>.</p>
+<p>If you <code>_RUN</code> a program containing
+<code>_TURBO ON/OFF</code> it will be an error.</p>
+<p><code>_TURBO ON/OFF</code> can not be written in a multi-statement
+lines.</p>
+<p><code>_TURBO ON/OFF</code> can not be nested. But you may have many
+closed blocks in a program.</p>
+<p>Variables and arrays are handled differently in and outside of the
+blocks. Once you are out of the block, variables and arrays used in the
+block are lost. Only, the integer types can be defined as common.</p>
+<pre><code>    100 DEFINT A-Z:DIM C(2),D(2)
+    110 A=1:B=2:C(0)=3:D(0)=4
+    120 _TURBO ON(A,C())
+    130 DIM D(2)
+    140 PRINT A,B,C(0),D(0)
+    150 A=5:B=6:C(0)=7:D(0)=8
+    160 _TURBO OFF
+    170 PRINT A,B,C(0),D(0)
+
+    RUN
+      1 0 3 0
+      5 2 7 4
+    Ok</code></pre>
+<p>Floating numbers used by the compiler is a special format 3-byte
+value. Its accuracy is about 4.5 digits. Double precision is not
+available.</p>
+<p>An array must be declared by a constant in the beginning.</p>
+<p>This compiler works on the BASIC program on the RAM and creates the
+objects and variables on the left RAM. So there is a limit of the size
+of the source program about 10K. Big arrays, string variables (each uses
+256 byte), <code>CLEAR ???,&amp;H????</code> will make the situation
+tighter as you can imagine. The compiled objects can not be saved as
+independent programs.</p>
+<p>Interrupts available, such as <code>KEY(1) ON, OFF</code> etc. But it
+will decrease the efficiency of the executed object’s size &amp;
+speed.</p>
+<p>Some statements may not work correctly.</p>
+<pre><code>    100 GOTO 130
+    110 A=3/2
+    120 END
+    130 DEFINT A-Z
+    140 GOTO 110</code></pre>
+<p>If you <code>RUN</code> this, A is 1. If you <code>_RUN</code> this,
+A is 1.5. <code>DEF???</code> will be effective when encountered during
+the execution in the case of interpreter, while it depends on the order
+of line number in the other case.</p>
+<p>A little complicated string operation may cause easily a “String
+formula too complex” error. As this compiler has only one level of stack
+for it. Break a long string formula into multiple small ones, if so.</p>
+<p>If you <code>_RUN</code> an endless program, you can not stop it.
+Make a part to check keyboards.</p>
+<pre><code>    100 GOTO 100 &#39;Reset or power off to stop
+
+    100 IF INKEY$=&quot;&quot; THEN 100
+    110 END</code></pre>
+<p>is better.</p>
+<p>
+ 
+</p>
+<h2 id="difference-from-msx-basic-interpreter">2. Difference from
+MSX-BASIC interpreter</h2>
+<p>List of statements, commands and functions that can not be
+compiled.</p>
+<p>AUTO, BASE, BLOAD, BSAVE, CALL, CDBL, CINT, CLEAR, CLOAD, CLOAD?,
+CLOSE, CONT, CSAVE, CSNG, CVD, CVI, CVS, DEFFN, DELETE, DRAW, DSKF, EOF,
+ERASE, ERL, ERR, ERROR, EQV, FIELD, FILES, FPOS, FRE, GET, IMP, INPUT#,
+KEY LIST, LFILES, LINEINPUT#, LIST, LLIST, LOAD, LOC, LOF, LPRINT USING,
+LSET, MAXFILES, MERGE, MOTOR, MKD<span
+class="math inline">, <em>M</em><em>K</em><em>I</em></span>, MKS$, NAME,
+NEW, ON ERROR GOTO, ON INTERVAL GOSUB (due to a bug), OPEN, PLAY,
+PRINT#, PRINT USING, PUT KANJI, RENUM, RESUME, RSET, SAVE, SPC, TAB,
+TRON, TROFF, WIDTH.</p>
+<p>List of those with limits.</p>
+<ul>
+<li><strong>CIRCLE</strong>: Start, end angles and aspect ratio can’t be
+specified.</li>
+<li><strong>COPY</strong>: Only graphic COPY is available.</li>
+<li><strong>DEFDBL</strong>: Same as DEFSNG.</li>
+<li><strong>DIM</strong>: Must come first in the program or in the turbo
+block.</li>
+<li><strong>INPUT</strong>: Can handle only one variable at the
+time.</li>
+<li><strong>KEY</strong>: ON KEY GOSUB, KEY(n) ON/OFF only.</li>
+<li><strong>LOCATE</strong>: x,y must be given in as a set. No cursor
+switch parameter.</li>
+<li><strong>NEXT</strong>: Variable names after the NEXT can not be
+omitted.</li>
+<li><strong>ON</strong>: ON STOP GOSUB, ON INTERVAL GOSUB not
+available.</li>
+<li><strong>PRINT</strong>: Commas work in a different way. No wrapping
+for digits.</li>
+<li><strong>PUT</strong>: PUT SPRITE only.</li>
+<li><strong>RUN</strong>: Variables won’t be initialized.</li>
+<li><strong>SCREEN</strong>: Screen mode and sprite size only.</li>
+<li><strong>SET</strong>: SET PAGE only.</li>
+<li><strong>STOP</strong>: Same as END.</li>
+<li><strong>USR</strong>: Parameter type must be integer only.</li>
+<li><strong>VARPTR</strong>: File number can not be given as the
+parameter.</li>
+</ul>
+<p>Otherwise there is no significant difference.</p>
+<p>In general, I/O commands &amp; functions, and editing commands can
+not be compiled. Of course they are available in the direct mode, and
+outside of the turbo block. You can edit, debug and save a program in
+MSX-BASIC and execute it by _RUN.</p>
+<p>If you want to use <code>PRINT#</code> to write characters on
+<code>GRP:</code>, use it outside of turbo block. Otherwise study the
+sample, “PRINT.TRB”.</p>
+<p>If you want to use PLAY, use BGM compiler, and get the sound by
+<code>USR(n)</code>.</p>
+<p>
+ 
+</p>
+<h2 id="new-features-added">3. New features added</h2>
+<p>3 special commands are available by starting a remark line with some
+specific characters.</p>
+<h4 id="i">#I</h4>
+<p>Stands for INLINE. You can write a short machine-language
+routine.</p>
+<pre><code>    100 DEFINT A-Z
+    110 K=1
+    120 &#39;#I &amp;H2A,K
+    130 &#39;#I &amp;HF3,&amp;HCD,@150,&amp;HFB
+    140 END
+    150 &#39;SUB
+    160 RETURN</code></pre>
+<p>120 means
+<code>LD HL,(K); K must be a simple variable of integer type.</code> 130
+means</p>
+<pre><code>    DI
+    CALL @150 ;Be careful, this line won&#39;t be RENUMed.
+    EI</code></pre>
+<h4 id="c">#C</h4>
+<p>Stands for CLIP. In the screen modes 5 through 8 (except for
+<code>PAINT</code>, and <code>CIRCL</code>E), this will be set clipping
+on and off.</p>
+<pre><code>    10 SCREEN 8
+    20 &#39;#C-
+    30 LINE(0,0)-(255,255) &#39;Y CLIPPED
+    40 IF INKEY$=&quot;&quot; THEN 40
+    50 &#39;#C+
+    60 LINE(0,0)-(255,255) &#39;NOT CLIPPED
+    70 IF INKEY$=&quot;&quot; THEN 70</code></pre>
+<h4 id="n">#N</h4>
+<p>Check if NEXT overflows.</p>
+<pre><code>    10 FOR I%=0 TO &amp;H7FFF
+    20 NEXT I%</code></pre>
+<p>This program will end up in a “Overflow error” in MSX-BASIC. And if
+_RUN, it will be an endless loop. If #N+ is specififed, it will end
+normally. This code will decrease the efficiency of the object, too.
+Better not use unless it’s really necessary. To clear, specify #N-.</p>
+<p>
+ 
+</p>
+<p><strong>NOTE</strong>: In MSX-2+ Sanyo you can found a new
+command:</p>
+<pre><code>    CALL BC</code></pre>
+<p>This command turn on the BASIC COMPILER options.</p>

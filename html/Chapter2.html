@@ -1,0 +1,4202 @@
+<h1 id="chapter-2---basic">CHAPTER 2 - BASIC</h1>
+<p>The BASIC of MSX2 has been upgraded: the new version is called MSX
+BASIC version 2.0. And, when using a disk system, MSX DISK-BASIC can be
+used, which consists of MSX BASIC version 2.0 and additional
+instructions for disk operations. The following sections describe these
+two versions of BASIC.</p>
+<p>
+ 
+</p>
+<h2 id="index">Index</h2>
+<p><a href="#list-of-instructions">1. LIST OF INSTRUCTIONS</a></p>
+<p><a href="#instructions-of-msx-basic-version-20">1.1 Instructions
+of MSX BASIC version 2.0</a></p>
+<p><a href="#instructions-of-msx-disk-basic">1.2 Instructions of MSX
+DISK-BASIC</a></p>
+<p><a href="#differences-in-msx-basic-version-20">2. DIFFERENCES IN
+MSX BASIC VERSION 2.0</a></p>
+<p><a href="#additions-or-modifications-to-screen-mode">2.1 Additions
+or Modifications to Screen Mode</a></p>
+<p><a
+href="#additions-or-modifications-for-the-colour-specification">2.2
+Additions or Modifications for the Colour Specification</a></p>
+<p><a
+href="#additions-or-modifications-for-the-character-display">2.3
+Additions or Modifications for the Character Display</a></p>
+<p><a href="#additions-or-modifications-for-the-graphics-display">2.4
+Additions or Modifications for the Graphics Display</a></p>
+<p><a href="#additions-or-modifications-for-vdp-access">2.5
+Additions or modifications for VDP access</a></p>
+<p><a href="#additions-or-modifications-for-sprite">2.7 Additions or
+Modifications for Sprite</a></p>
+<p><a href="#additions-for-optional-features">2.8 Additions for
+Optional Features</a></p>
+<p><a href="#additions-for-timer-features">2.9 Additions for Timer
+Features</a></p>
+<p><a href="#additions-for-memory-switch">2.10 Additions for Memory
+Switch</a></p>
+<p><a href="#additions-for-ram-disk">2.11 Additions for RAM
+Disk</a></p>
+<p><a href="#other-additions">2.12 Other Additions</a></p>
+<p><a href="#internal-structure-of-basic">3. INTERNAL STRUCTURE OF
+BASIC</a></p>
+<p><a href="#users-area">3.1 User’s Area</a></p>
+<p><a href="#detailed-view-of-the-users-area">3.2 Detailed View of
+the User’s Area</a></p>
+<p><a href="#storage-format-of-basic-programs">3.3 Storage format of
+BASIC programs</a></p>
+<p><a href="#linking-with-assembly-language-programs">4. LINKING WITH
+ASSEMBLY LANGUAGE PROGRAMS</a></p>
+<p><a href="#usr-function">4.1 USR Function</a></p>
+<p><a
+href="#data-exchange-by-the-argument-and-return-value-of-usr-function">4.2
+Data Exchange by the Argument and Return Value of USR Function</a></p>
+<p><a href="#making-new-commands">4.3 Making New Commands</a></p>
+<p><a href="#expansion-of-cmd-command">4.4 Expansion of CMD
+command</a></p>
+<p><a href="#interrupt-usage">4.5 Interrupt usage</a></p>
+<p><a href="#notes-on-software-development">5. NOTES ON SOFTWARE
+DEVELOPMENT</a></p>
+<p><a href="#error-code-list">Error code list</a></p>
+<p><a href="#changes-from-the-original">Changes from the
+original</a></p>
+<p>
+ 
+</p>
+<h2 id="list-of-instructions">1. LIST OF INSTRUCTIONS</h2>
+<p>First of all, the sentence and function for each instruction of BASIC
+are listed. Each instruction is listed in the format shown in <a
+href="#figure-2.1-instruction-list-format">Figure 2.1</a>.</p>
+<h5 id="figure-2.1-instruction-list-format"><em>Figure 2.1 Instruction
+list format</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.1.png"
+alt="Figure 2.1" />
+<figcaption aria-hidden="true">Figure 2.1</figcaption>
+</figure>
+<h4 id="a-syntax-of-instructions">(a) Syntax of instructions</h4>
+<p>If there is an **“*“** followed by a keyword, it indicates that the
+syntax or function of the instruction has just been modified after
+version 1.0, or that the instruction has been added to version 2.0.</p>
+<p>Descriptions of sentences use the following notational
+conventions.</p>
+<pre><code>* [item] .............. the item is optional
+* [, item ... ] ....... more items having the same form may appear
+* [item1 | item2] ..... choose item1 or item2</code></pre>
+<p>And <code>&lt;filename&gt;</code>, which is used in the sentence, is
+a string specifying I/O devices or files for input/output in the format
+listed below. <code>&lt;Filename&gt;</code> for a cassette files is a
+string consisting of any combination of up to 6 characters.
+<code>&lt;filename&gt;</code> for disk or RAM disk is a string, whose
+form is
+<code>"&lt;filename (up to 8 characters)&gt; + &lt;filename extension (up to 3 characters)&gt;"</code>.
+<code>&lt;drive&gt;</code> is one of characters from A to H (depending
+on the number of drives connected).</p>
+<pre><code>&quot;CAS: &lt;filename&gt;&quot; ..... Cassette file
+&quot;MEM: &lt;filename&gt;&quot; ..... RAM disk
+&quot;CRT:&quot; ................ Text screen
+&quot;GRP:&quot; ................ Graphic screen
+&quot;LPT:&quot; ................ Printer
+&quot;&lt;drive&gt;:&lt;filename&gt;&quot; .. Disk file</code></pre>
+<h4 id="b-instruction-type">(b) Instruction type</h4>
+<p>There are four types of instructions:</p>
+<pre><code>* Function ............ Returns a certain value depending on the given parameter(s).
+* System variable ..... Variables available from BASIC. Generally, assignment is allowed.
+* Statement ........... Takes a certain action.
+* Command ............. Gives an instruction to BASIC interpreter itself.</code></pre>
+<h4 id="c-function-or-action-of-instruction">(c) Function or action of
+instruction</h4>
+<p>The following list gives a brief description of the action for each
+instruction. More detailed descriptions about instructions which have
+been modified or added at version 2.0 are given in <a
+href="#differences-in-msx-basic-version-20">section 2</a>.</p>
+<p>
+ 
+</p>
+<h3 id="instructions-of-msx-basic-version-20">1.1 Instructions of MSX
+BASIC version 2.0</h3>
+<h4 id="a">— A —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ABS (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns absolute value of <code>&lt;expression&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>ASC (&lt;string&gt;)</code></td>
+<td>Function</td>
+<td>Returns the code of the first character of
+<code>&lt;string&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>ATN (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns arc tangent of <code>&lt;expression&gt;</code> in
+radians.</td>
+</tr>
+<tr class="even">
+<td><code>AUTO [&lt;linenumber&gt;[, &lt;increment&gt;]]</code></td>
+<td>Command</td>
+<td>Produces line numbers automatically.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="b">— B —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong><code>* BASE (&lt;expression&gt;)</code></strong></td>
+<td>System variable</td>
+<td>Contains the table address of the screen assigned on VRAM.</td>
+</tr>
+<tr class="even">
+<td><code>BEEP</code></td>
+<td>Statement</td>
+<td>Produces beep to the audio terminal.</td>
+</tr>
+<tr class="odd">
+<td><code>BIN$ (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Converts the value of <code>&lt;expression&gt;</code> to a string of
+binary expression, then returns its result.</td>
+</tr>
+<tr class="even">
+<td><code>BLOAD "&lt;filename&gt;"[,R[,offset]]</code></td>
+<td>Command</td>
+<td>Loads an assembly language program.</td>
+</tr>
+<tr class="odd">
+<td><code>BSAVE "&lt;filename&gt;",&lt;start address&gt;,&lt;end address&gt;[,&lt;execution address&gt;]</code></td>
+<td>Command</td>
+<td>Saves an assembly language program.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="c">— C —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>CALL &lt;extended statement name&gt;[(&lt;argument&gt;[,&lt;argument&gt;...])]</code></td>
+<td>Statement</td>
+<td>Calls the extended statements by inserting various cartridges.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* CALL MEMINI [(&lt;upper limitation of RAM disk&gt;)]</code></strong></td>
+<td>Statement</td>
+<td>Specifies the upper limit of memory for Ram disk.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* CALL MFILES</code></strong></td>
+<td>Statement</td>
+<td>Lists file names in RAM disk.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* CALL MKILL ("&lt;filename&gt;")</code></strong></td>
+<td>Statement</td>
+<td>Deletes a file in RAM disk.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* CALL MNAME ("&lt;old filename&gt;" AS "&lt;new filename&gt;")</code></strong></td>
+<td>Statement</td>
+<td>Renames a file in RAM disk.</td>
+</tr>
+<tr class="even">
+<td><code>CDBL (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Converts the value of <code>&lt;expression&gt;</code> to a double
+precission real value and returns its result.</td>
+</tr>
+<tr class="odd">
+<td><code>CHR$ (&lt;expression&gt;)     Returns a character which has the code of</code></td>
+<td>Function</td>
+<td><code>&lt;expression&gt;</code> value.</td>
+</tr>
+<tr class="even">
+<td><code>CINT (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Converts the value of <code>&lt;expression&gt;</code> to an integer
+value and returns its result.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* CIRCLE {(X,Y) \| STEP(X,Y)},&lt;radius&gt;[, &lt;colour&gt;[, &lt;start angle&gt;[, &lt;end angle&gt;[, &lt;proportion&gt;]]]]</code></strong></td>
+<td>Statement</td>
+<td>Draws a circle whose center is at (X,Y) and whose size depends on
+<code>&lt;radius&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>CLEAR [&lt;size of string area&gt;[, &lt;upper limitation of memory&gt;]]</code></td>
+<td>Statement</td>
+<td>Initialises variables and sets the size of memory area.</td>
+</tr>
+<tr class="odd">
+<td><code>CLOAD ["&lt;filename&gt;"]</code></td>
+<td>Command</td>
+<td>Loads a program from cassette.</td>
+</tr>
+<tr class="even">
+<td><code>CLOAD? ["&lt;filename&gt;"]</code></td>
+<td>Command</td>
+<td>Compares a program on cassette with the one in memory.</td>
+</tr>
+<tr class="odd">
+<td><code>CLOSE [[#]&lt;filenumber&gt;[, [#]&lt;filenumber&gt;...]]</code></td>
+<td>Command</td>
+<td>Closes a file represented by <code>&lt;filenumber&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>CLS</code></td>
+<td>Statement</td>
+<td>Clears screen.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* COLOR [&lt;foreground colour&gt;[, &lt;background colour&gt;[, &lt;border colour&gt;]]]</code></strong></td>
+<td>Statement</td>
+<td>Specifies the colours of each part of the screen.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* COLOR [=NEW]</code></strong></td>
+<td>Statement</td>
+<td>Initialises the palette.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* COLOR = (&lt;palette number&gt;, &lt;red brightness&gt;, &lt;green brightness&gt;, &lt;blue brightness&gt;)</code></strong></td>
+<td>Statement</td>
+<td>Sets the palette colour.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* COLOR = RESTORE</code></strong></td>
+<td>Statement</td>
+<td>Puts the contents of the colour palette storage table into the
+palette register.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* COLOR SPRITE (&lt;sprite plane number&gt;)=&lt;colour&gt;</code></strong></td>
+<td>Statement</td>
+<td>Sets the colour to the sprite of
+<code>&lt;sprite plane number&gt;</code> to the specified colour.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* COLOR SPRITE$ (&lt;sprite plane number&gt;)=&lt;string expression&gt;</code></strong></td>
+<td>Statement</td>
+<td>Sets the colour of each horizontal line of the sprite using
+<code>&lt;string expression&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>CONT</code></td>
+<td>Command</td>
+<td>Resumes the execution of the program which has been stopped.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* COPY &lt;source&gt; TO &lt;destination&gt;</code></strong></td>
+<td>Statement</td>
+<td>Transfers the screen data among the screen, array, and disk
+file.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* COPY SCREEN [&lt;mode&gt;]</code></strong></td>
+<td>Statement</td>
+<td>Writes colour bus data into VRAM (optional).</td>
+</tr>
+<tr class="even">
+<td><code>COS (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns the cosine value of
+<code>&lt;expression (in radians)&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>CSAVE "&lt;filename&gt;"[, &lt;baud rate&gt;]</code></td>
+<td>Command</td>
+<td>Saves a program to cassette.</td>
+</tr>
+<tr class="even">
+<td><code>CSGN (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Converts the value of <code>&lt;expression&gt;</code> to a single
+precision real value, and returns its result.</td>
+</tr>
+<tr class="odd">
+<td><code>CSRLIN</code></td>
+<td>System variable</td>
+<td>Contains the vertical screen location of the cursor. No assignment
+is allowed.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="d">— D —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>DATA &lt;constant&gt;[, &lt;constant&gt;...]</code></td>
+<td>Statement</td>
+<td>Prepares data to be read by READ statement.</td>
+</tr>
+<tr class="even">
+<td><code>DEF FN &lt;name&gt; [(&lt;argument&gt;[, &lt;argument&gt;...])]=&lt;function-definitive expression&gt;</code></td>
+<td>Statement</td>
+<td>Defines a user-defined function.</td>
+</tr>
+<tr class="odd">
+<td><code>DEFINT &lt;character range&gt;[, &lt;character range&gt;...]</code></td>
+<td>Statement</td>
+<td>Declares the specified variable(s) as integer type.</td>
+</tr>
+<tr class="even">
+<td><code>DEFSNG &lt;character range&gt;[, &lt;character range&gt;...]</code></td>
+<td>Statement</td>
+<td>Declares the specified variable(s) as single precision real
+type.</td>
+</tr>
+<tr class="odd">
+<td><code>DEFDBL &lt;character range&gt;[, &lt;character range&gt;...]</code></td>
+<td>Statement</td>
+<td>Declares the specified variable(s) as double precision real
+type.</td>
+</tr>
+<tr class="even">
+<td><code>DEFSTR &lt;character range&gt;[, &lt;character range&gt;...]</code></td>
+<td>Statement</td>
+<td>Declares the specified variable(s) as character type.</td>
+</tr>
+<tr class="odd">
+<td><code>DEF USR [&lt;number&gt;]=&lt;start address&gt;</code></td>
+<td>Statement</td>
+<td>Defines the starting address for the execution of assembly language
+routine, called by USR function.</td>
+</tr>
+<tr class="even">
+<td><code>DELETE {[&lt;start linenumber&gt;-&lt;end linenumber&gt;] \| &lt;linenumber&gt; \| -&lt;end linenumber&gt;}</code></td>
+<td>Command</td>
+<td>Deletes the specified portion of the program.</td>
+</tr>
+<tr class="odd">
+<td><code>DIM &lt;variable name&gt; (&lt;maximum subscript value&gt;[, &lt;maximum subscript value&gt;...])</code></td>
+<td>Statement</td>
+<td>Defines an array variable and allocates it into memory.</td>
+</tr>
+<tr class="even">
+<td><code>DRAW &lt;string expression&gt;</code></td>
+<td>Statement</td>
+<td>Draws a line or lines on the screen according to
+<code>&lt;string expression (DRAW macro)&gt;</code>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="e">— E —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>END</code></td>
+<td>Statement</td>
+<td>Ens the program, close all files, and returns to the command
+level.</td>
+</tr>
+<tr class="even">
+<td><code>EOF (&lt;filenumber&gt;)</code></td>
+<td>Function</td>
+<td>Checks if the file is finished and returns -1 if at the end of
+file.</td>
+</tr>
+<tr class="odd">
+<td><code>ERASE &lt;array variable name&gt;[, &lt;array variable name&gt;...]</code></td>
+<td>Statement</td>
+<td>Deletes the array variable(s).</td>
+</tr>
+<tr class="even">
+<td><code>ERL</code></td>
+<td>System variable</td>
+<td>Contains the error code for the preceding error. No assignment is
+allowed.</td>
+</tr>
+<tr class="odd">
+<td><code>ERR</code></td>
+<td>System variable</td>
+<td>Contains the line number of the previous error. No assignment is
+allowed.</td>
+</tr>
+<tr class="even">
+<td><code>ERROR &lt;error code&gt;</code></td>
+<td>Statement</td>
+<td>Puts the program into the error condition.</td>
+</tr>
+<tr class="odd">
+<td><code>EXP (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns the exponent (power) of the natural exponential form of
+<code>&lt;expression&gt;</code>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="f">— F —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>FIX (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns the value of <code>&lt;expression&gt;</code>, without any
+decimal fractions.</td>
+</tr>
+<tr class="even">
+<td><code>FOR &lt;variable name&gt; = &lt;initial value&gt; TO &lt;end value&gt; [STEP &lt;increment&gt;]</code></td>
+<td>Statement</td>
+<td>Repeats the execution from FOR statement to NEXT statement for the
+specified times.</td>
+</tr>
+<tr class="odd">
+<td><code>FRE ({&lt;expression&gt; \| &lt;string expression&gt;})</code></td>
+<td>Function</td>
+<td>Returns the size of unused user’s area or unused character
+area.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="g">— G —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong><code>* GET DATE &lt;string variable name&gt;[, A]</code></strong></td>
+<td>Statement</td>
+<td>Assigns date into a string variable.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* GET TIME &lt;string variable name&gt;[, A]</code></strong></td>
+<td>Statement</td>
+<td>Assigns time into a string variable.</td>
+</tr>
+<tr class="odd">
+<td><code>GOSUB &lt;linenumber&gt;</code></td>
+<td>Statement</td>
+<td>Calls the subroutine at <code>&lt;linenumber&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>GOTO &lt;linenumber&gt;</code></td>
+<td>Statement</td>
+<td>Jumps to <code>&lt;linenumber&gt;</code>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="h">— H —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>HEX$ (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Converts the value of <code>&lt;expression&gt;</code> to a string of
+hexadecimal expression, then returns its result.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="i">— I —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>IF &lt;condition&gt; THEN {&lt;statement&gt; \| &lt;linenumber&gt;} [ELSE {&lt;statement&gt; \| &lt;linenumber&gt;}]</code></td>
+<td>Statement</td>
+<td>Judges the condition. If <code>&lt;condition&gt;</code> is not zero,
+it is true.</td>
+</tr>
+<tr class="even">
+<td><code>IF &lt;condition&gt; GOTO &lt;linenumber&gt; [ELSE {&lt;statement&gt; \| &lt;linenumber&gt;}]</code></td>
+<td>Statement</td>
+<td>Judges the condition. If <code>&lt;condition&gt;</code> is not zero,
+it is true.</td>
+</tr>
+<tr class="odd">
+<td><code>INKEY$</code></td>
+<td>Function</td>
+<td>Returns a character when a key is being pressed, or when not,
+returns null string.</td>
+</tr>
+<tr class="even">
+<td><code>INP (&lt;port number&gt;)</code></td>
+<td>Function</td>
+<td>Reads the port specified by <code>&lt;port number&gt;</code> and
+returns its result.</td>
+</tr>
+<tr class="odd">
+<td><code>INPUT ["&lt;prompt statement&gt;";]&lt;variable name&gt;[, &lt;variable name&gt;...]</code></td>
+<td>Statement</td>
+<td>Assigns data input from keyboard into the specified
+variable(s).</td>
+</tr>
+<tr class="even">
+<td><code>INPUT #&lt;filenumber&gt;, &lt;variable name&gt;[, &lt;variable name&gt;...]</code></td>
+<td>Statement</td>
+<td>Reads data from the file and assigns the data into the specified
+variable(s).</td>
+</tr>
+<tr class="odd">
+<td><code>INPUT$ (&lt;number of characters&gt;[, [#]&lt;filenumber&gt;])</code></td>
+<td>Function</td>
+<td>Reads the specified size of string from the keyboard or file.</td>
+</tr>
+<tr class="even">
+<td><code>INSTR ([&lt;expression&gt;,]&lt;string expression 1&gt;,&lt;string expression 2&gt;)</code></td>
+<td>Function</td>
+<td>Searches <code>&lt;string expression 2&gt;</code> from the left of
+<code>&lt;string expression 1&gt;</code>, and returns its location if
+found, otherwise zero. <code>&lt;Expression&gt;</code> is the character
+location to start searching.</td>
+</tr>
+<tr class="odd">
+<td><code>INT (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns the largest integer less than
+<code>&lt;expression&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>INTERVAL {ON \| OFF \| STOP}</code></td>
+<td>Statement</td>
+<td>Allows, suppresses, or suspends the timer interrupt.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="k">— K —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>KEY &lt;key number&gt;,&lt;string&gt;</code></td>
+<td>Command</td>
+<td>Redefines a function key.</td>
+</tr>
+<tr class="even">
+<td><code>KEY LIST</code></td>
+<td>Command</td>
+<td>Displays the contents of function keys.</td>
+</tr>
+<tr class="odd">
+<td><code>KEY (&lt;key number&gt;){ON \| OFF \| STOP}</code></td>
+<td>Statement</td>
+<td>Allows, supresses, os suspends the function key interrupt.</td>
+</tr>
+<tr class="even">
+<td><code>KEY {ON \| OFF}</code></td>
+<td>Statement</td>
+<td>Specifies whethter to display the contents of function keys at the
+bottom of the screen.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="l">— L —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>LEFT$ (&lt;string expression&gt;,&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Gets <code>&lt;expression&gt;</code> characters from the left of
+<code>&lt;string expression&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>LEN (&lt;string expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns the number of characters of
+<code>&lt;string expression&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>[LET] &lt;variable name&gt; = &lt;expression&gt;</code></td>
+<td>Statement</td>
+<td>Assigns the value of <code>&lt;expression&gt;</code> to the
+variable.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* LINE [{(X1,Y1) \| STEP(X1,Y1)}] - {(X2,Y2) \| STEP(X2,Y2)}[, &lt;colour&gt; [, {B\|BF}[, &lt;logical operation&gt;]]]</code></strong></td>
+<td>Statement</td>
+<td>Draws a line or a rectangle on the screen.</td>
+</tr>
+<tr class="odd">
+<td><code>LINE INPUT ["&lt;prompt statement&gt;";]&lt;string variable name&gt;</code></td>
+<td>Statement</td>
+<td>Assigns a whole line of string data from the keyboard into the
+string variable.</td>
+</tr>
+<tr class="even">
+<td><code>LINE INPUT# &lt;filenumber&gt;, &lt;string variable name&gt;</code></td>
+<td>Statement</td>
+<td>Reads data in lines from the file and assigns the data into the
+string variable.</td>
+</tr>
+<tr class="odd">
+<td><code>LIST [[&lt;linenumber&gt;] - [&lt;linenumber&gt;]]</code></td>
+<td>Command</td>
+<td>Displays the program in memory on the screen.</td>
+</tr>
+<tr class="even">
+<td><code>LLIST [[&lt;linenumber&gt;] - [&lt;linenumber&gt;]]</code></td>
+<td>Command</td>
+<td>Sends the program in memory to the printer.</td>
+</tr>
+<tr class="odd">
+<td><code>LOAD "&lt;filename&gt;" [,R]</code></td>
+<td>Command</td>
+<td>Loads a program saved in ASCII format.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* LOCATE [&lt;X-coordinate&gt;[, &lt;Y-coordinate&gt;[, &lt;cursor switch&gt;]]]</code></strong></td>
+<td>Statement</td>
+<td>Locates the cursor on the text screen.</td>
+</tr>
+<tr class="odd">
+<td><code>LOG (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns the natural logarithm of
+<code>&lt;expression&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>LPOS (&lt;expression&gt;)</code></td>
+<td>System variable</td>
+<td>Contains the location of the printer head. No assignment is
+allowed.</td>
+</tr>
+<tr class="odd">
+<td><code>LPRINT [&lt;expression&gt;[{; \| ,}&lt;express]ion&gt;...]</code></td>
+<td>Statement</td>
+<td>Outputs characters or numerical values to the printer.</td>
+</tr>
+<tr class="even">
+<td><code>LPRINT USING &lt;form&gt;; &lt;expression&gt;[{; \| ,}&lt;expression&gt;...]</code></td>
+<td>Statement</td>
+<td>Outputs characters or numerical values through the printer according
+to <code>&lt;form&gt;</code>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="m">— M —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>MAXFILES = &lt;number of files&gt;</code></td>
+<td>Statement</td>
+<td>Sets the number of files to be opened.</td>
+</tr>
+<tr class="even">
+<td><code>MERGE "&lt;filename&gt;"</code></td>
+<td>Command</td>
+<td>Merges the program in memory with the program saved in ASCII format
+(in external storage device).</td>
+</tr>
+<tr class="odd">
+<td><code>MID$ (&lt;string expression&gt;, &lt;expression 1&gt;[, &lt;expression 2&gt;])</code></td>
+<td>Function</td>
+<td>Returns <code>&lt;expression 2&gt;</code> character(s) starting from
+the <code>&lt;expression 1&gt;</code>th position of
+<code>&lt;string expression&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>MID$ (&lt;string variable name&gt;, &lt;expression 1&gt;[, &lt;expression 2&gt;]) = &lt;string expression&gt;</code></td>
+<td>Statement</td>
+<td>Defines <code>&lt;string expression&gt;</code> using
+<code>&lt;expression 2&gt;</code> character(s) from the
+<code>&lt;expression 1&gt;</code>th position of
+<code>&lt;string variable name&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>MOTOR [{ON \| OFF}]</code></td>
+<td>Statement</td>
+<td>Turns the motor of cassette ON and OFF.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="n">— N —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>NEW</code></td>
+<td>Command</td>
+<td>Deletes the program in meory and clears variables.</td>
+</tr>
+<tr class="even">
+<td><code>NEXT [&lt;variable name&gt;[, &lt;variable name&gt;...]]</code></td>
+<td>Statement</td>
+<td>Indicates the end of FOR statement.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="o">— O —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>OCT$ (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Converts the value of <code>&lt;expression&gt;</code> to the string
+of octal expression and returns its result.</td>
+</tr>
+<tr class="even">
+<td><code>ON ERROR GOTO &lt;linenumber&gt;</code></td>
+<td>Statement</td>
+<td>Defines the line to begin the error handling routine.</td>
+</tr>
+<tr class="odd">
+<td><code>ON &lt;expression&gt; GOSUB &lt;linenumber&gt;[, &lt;linenumber&gt;...]</code></td>
+<td>Statement</td>
+<td>Executes the subroutine at <code>&lt;linenumber&gt;</code> according
+to <code>&lt;expression&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>ON &lt;expression&gt; GOTO &lt;linenumber&gt;[, &lt;linenumber&gt;...]</code></td>
+<td>Statement</td>
+<td>Jumps to <code>&lt;linenumber&gt;</code> according to
+<code>&lt;expression&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>ON INTERVAL = &lt;time&gt; GOSUB &lt;linenumber&gt;</code></td>
+<td>Statement</td>
+<td>Defines the timer interrupt interval and the line to begin the
+interrupt handling routine.</td>
+</tr>
+<tr class="even">
+<td><code>ON KEY GOSUB &lt;linenumber&gt;[, &lt;linenumber&gt;...]</code></td>
+<td>Statament</td>
+<td>Defines the line to begin the function key interrupt handling
+routine.</td>
+</tr>
+<tr class="odd">
+<td><code>ON SPRITE GOSUB &lt;linenumber&gt;</code></td>
+<td>Statement</td>
+<td>Defines the line to begin the piled-sprite interrupt handling
+routine.</td>
+</tr>
+<tr class="even">
+<td><code>ON STOP GOSUB &lt;linenumber&gt;</code></td>
+<td>Statament</td>
+<td>Defines the line to begin the CTRL+STOP key interrupt handling
+routine.</td>
+</tr>
+<tr class="odd">
+<td><code>ON STRING GOSUB &lt;linenumber&gt;[, &lt;linenumber&gt;...]</code></td>
+<td>Statement</td>
+<td>Defines the line to begin the trigger button interrupt handling
+routine.</td>
+</tr>
+<tr class="even">
+<td><code>OPEN "&lt;filename&gt;" [FOR &lt;mode&gt;] AS #&lt;filenumber&gt;</code></td>
+<td>Statement</td>
+<td>Opens the file in the specified mode.</td>
+</tr>
+<tr class="odd">
+<td><code>OUT &lt;port number&gt;,&lt;expression&gt;</code></td>
+<td>Statement</td>
+<td>Sends data to the output port specified by
+<code>&lt;port number&gt;</code>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p">— P —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong><code>* PAD (&lt;expression&gt;)</code></strong></td>
+<td>Function</td>
+<td>Examines the state of tablet, mouse, light pen, or track ball
+specified by <code>&lt;expression&gt;</code>, then returns its
+result.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* PAINT {(X,Y) \| STEP(X,Y)}[, &lt;colour&gt;[, &lt;border colour&gt;]]</code></strong></td>
+<td>Statement</td>
+<td>Paints the area surrounded by specified
+<code>&lt;border colour&gt;</code> using
+<code>&lt;colour&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>PDL (&lt;paddle number&gt;)</code></td>
+<td>Function</td>
+<td>Returns the state of the paddle which has the specified number.</td>
+</tr>
+<tr class="even">
+<td><code>PEEK (&lt;address&gt;)</code></td>
+<td>Function</td>
+<td>Returns the contents of one byte of the memory specified by
+<code>&lt;address&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>PLAY &lt;string expression 1&gt;[, &lt;string expression 2&gt;[, &lt;string expression 3&gt;]]</code></td>
+<td>Statement</td>
+<td>Plays the music by
+<code>&lt;string expression (music macro)&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>PLAY (&lt;voice channel&gt;)</code></td>
+<td>Function</td>
+<td>Examines whethter the music is being played and returns its result
+(if in play, -1 is returned).</td>
+</tr>
+<tr class="odd">
+<td><code>POINT (X,Y)</code></td>
+<td>Function</td>
+<td>Returns the colour of the dot specified by coordinate (X,Y).</td>
+</tr>
+<tr class="even">
+<td><code>POKE &lt;address&gt;,&lt;data&gt;</code></td>
+<td>Statement</td>
+<td>Writes one byte of <code>&lt;data&gt;</code> into the memory
+specified by <code>&lt;address&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>POS (&lt;expression&gt;)</code></td>
+<td>System variable</td>
+<td>Contains the horizontal location of the cursor on the text screen.
+No assignment is allowed.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* PRESET {(X,Y) \| STEP(X,Y)}[, &lt;colour&gt;[, &lt;logical operation&gt;]]</code></strong></td>
+<td>Statement</td>
+<td>Erases the dot specified by coordinate (X,Y) on the graphic
+screen</td>
+</tr>
+<tr class="odd">
+<td><code>PRINT [&lt;expression [{; \| ,}&lt;expression&gt;...]</code></td>
+<td>Statement</td>
+<td>Displays characters of numbers on the screen.</td>
+</tr>
+<tr class="even">
+<td><code>PRINT USING &lt;form&gt;; &lt;expression&gt;[{; \| ,}&lt;expression&gt;...]</code></td>
+<td>Statement</td>
+<td>Displays characters or numbers on the screen according to
+<code>&lt;form&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>PRINT #&lt;filenumber&gt;, [&lt;expression&gt;[{; \| ,}&lt;expression&gt;...]]</code></td>
+<td>Statement</td>
+<td>Writes characters or numbers to the file specified by
+<code>&lt;file number&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>PRINT #&lt;filenumber&gt;, USING &lt;form&gt;; &lt;expression&gt;[{; \| ,}&lt;expression&gt;...]</code></td>
+<td>Statement</td>
+<td>Writes characters or numbers to the file specified by
+<code>&lt;file number&gt;</code> according to
+<code>&lt;form&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>PSET {(X,Y) \| STEP(X,Y)}[, &lt;colour&gt;[, &lt;logical operation&gt;]]</code></td>
+<td>Statement</td>
+<td>Draws the dot in the coordinate specified by (X,Y) on the graphic
+screen.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* PUT KANJI [(X,Y)],&lt;JIS kanji code&gt;[, &lt;colour&gt;[, &lt;logical operation&gt; [, &lt;mode&gt;]]]</code></strong></td>
+<td>Statement</td>
+<td>Displays the kanji on the screen (KANJI ROM is required).</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* PUT SPRITE &lt;sprite plane number&gt;[, {(X,Y) \| STEP(X,Y)}[, &lt;colour&gt;[, &lt;sprite pattern number&gt;]]]</code></strong></td>
+<td>Statement</td>
+<td>Displays the sprite pattern.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="r">— R —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>READ &lt;variable name&gt;[, &lt;variable name&gt;...]</code></td>
+<td>Statement</td>
+<td>Reads data from DATA statement(s) and assigns the data to the
+variable(s).</td>
+</tr>
+<tr class="even">
+<td><code>REM [&lt;comment&gt;]</code></td>
+<td>Statement</td>
+<td>Puts the comment in the program.</td>
+</tr>
+<tr class="odd">
+<td><code>RENUM [&lt;new linenumber&gt;[, &lt;old linenumber&gt;[, &lt;increment&gt;]]]</code></td>
+<td>Command</td>
+<td>Renumbers the line numbers.</td>
+</tr>
+<tr class="even">
+<td><code>RESTORE [&lt;linenumber&gt;]</code></td>
+<td>Statement</td>
+<td>Specifies the line to begin reading DATA by READ statement.</td>
+</tr>
+<tr class="odd">
+<td><code>RESUME {[0] \| NEXT \| &lt;linenumber&gt;}</code></td>
+<td>Statement</td>
+<td>Ends the error recovery routine and resumes execution of the
+program.</td>
+</tr>
+<tr class="even">
+<td><code>RETURN [&lt;linenumber&gt;]</code></td>
+<td>Statement</td>
+<td>Returns from a subroutine.</td>
+</tr>
+<tr class="odd">
+<td><code>RIGHT$ (&lt;string expression&gt;, &lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Gets <code>&lt;expression&gt;</code> characters from the right of
+<code>&lt;string expression&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>RND [(&lt;expression&gt;)]</code></td>
+<td>Function</td>
+<td>Returns a random number between 0 and 1.</td>
+</tr>
+<tr class="odd">
+<td><code>RUN [&lt;linenumber&gt;]</code></td>
+<td>Command</td>
+<td>Executes the program from <code>&lt;linenumber&gt;</code>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="s">— S —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>SAVE "&lt;filename&gt;"</code></td>
+<td>Command</td>
+<td>Saves the program in ASCII format.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* SCREEN &lt;screen mode&gt;[, &lt;sprite size&gt;[, &lt;key click switch&gt;[, &lt;cassette baud rate&gt;[, &lt;printer option&gt;[, &lt;interlace mode&gt;]]]]]</code></strong></td>
+<td>Statement</td>
+<td>Sets the screen mode and so on.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* SET ADJUST (&lt;X-coordinate offset&gt;, &lt;Y-coordinate offset&gt;)</code></strong></td>
+<td>statement</td>
+<td>Changes the display location of the screen. Ranges from -7 to
+8.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* SET BEEP &lt;timbre&gt;, &lt;volume&gt;</code></strong></td>
+<td>Statement</td>
+<td>Selects the BEEP tone. Ranges from 1 to 4.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* SET DATE &lt;strign expression&gt;[, A]</code></strong></td>
+<td>Statement</td>
+<td>Sets a date. “A” is the specification of alarm.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* SET PAGE &lt;display page&gt;, &lt;active page&gt;</code></strong></td>
+<td>Statement</td>
+<td>Specifies the page to display and the page to read and write data
+to.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* SET PASSWORD &lt;string expression&gt;</code></strong></td>
+<td>Statement</td>
+<td>Sets a password.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* SET PROMPT &lt;string expression&gt;</code></strong></td>
+<td>Statement</td>
+<td>Sets a prompt (up to 8 characters).</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* SET SCREEN</code></strong></td>
+<td>Statement</td>
+<td>Reserves the parameters of the current settings of SCREEN
+statement.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* SET TIME &lt;string expression&gt;[, A]</code></strong></td>
+<td>Statement</td>
+<td>Sets time. “A” is the alarm specification.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* SET VIDEO [&lt;mode&gt;[, &lt;Ym&gt;[, &lt;CB&gt;[, &lt;sync&gt;[, &lt;voice&gt;[, &lt;video input&gt;[, &lt;AV control&gt;]]]]]]]</code></strong></td>
+<td>Statement</td>
+<td>Sets superimposing and other modes (optional).</td>
+</tr>
+<tr class="even">
+<td><code>SGN (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Examines the sign of <code>&lt;expression&gt;</code> and returns its
+result (positive=1, zero=0, negative=-1).</td>
+</tr>
+<tr class="odd">
+<td><code>SIN (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns the sine of <code>&lt;expression&gt;</code> in radians.</td>
+</tr>
+<tr class="even">
+<td><code>SOUND &lt;register number&gt;,&lt;data&gt;</code></td>
+<td>Statement</td>
+<td>Writes data to the register of PSG.</td>
+</tr>
+<tr class="odd">
+<td><code>SPACE$ (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns a string containing <code>&lt;expression&gt;</code>
+spaces.</td>
+</tr>
+<tr class="even">
+<td><code>SPC (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Produces <code>&lt;expression&gt;</code> spaces; used in the
+instructions of PRINT family.</td>
+</tr>
+<tr class="odd">
+<td><code>SPRITE {ON \| OFF \| STOP}</code></td>
+<td>Statement</td>
+<td>Allows, supresses, or suspends the piled-sprite interrupt.</td>
+</tr>
+<tr class="even">
+<td><code>SPRITE$ (&lt;sprite pattern number&gt;)</code></td>
+<td>System variable</td>
+<td>Contains the sprite pattern.</td>
+</tr>
+<tr class="odd">
+<td><code>SQR (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns the square root of <code>&lt;expression&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>STICK (&lt;joystick number&gt;)</code></td>
+<td>Function</td>
+<td>Examines the direction of the joystick and returns its result.</td>
+</tr>
+<tr class="odd">
+<td><code>STOP</code></td>
+<td>Statement</td>
+<td>Stops the execution of the program.</td>
+</tr>
+<tr class="even">
+<td><code>STRIG (&lt;joystick number&gt;)</code></td>
+<td>Function</td>
+<td>Examines the state of the trigger button and returns its
+result.</td>
+</tr>
+<tr class="odd">
+<td><code>STRIG (&lt;joystick number&gt;) {ON \| OFF \| STOP}</code></td>
+<td>Statement</td>
+<td>Allows, supresses, or suspends interrupts from the trigger
+button.</td>
+</tr>
+<tr class="even">
+<td><code>STR$ (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Converts the value of <code>&lt;expression&gt;</code> to a string
+decimal expression and returns its result.</td>
+</tr>
+<tr class="odd">
+<td><code>STRING$ (&lt;expression 1&gt;, {&lt;string expression&gt; \| &lt;expression 2&gt;}</code></td>
+<td>Function</td>
+<td>Converts the leading character of
+<code>&lt;string expression&gt;</code> or the character containing the
+code <code>&lt;expression 2&gt;</code> to a string whose length is
+<code>&lt;expression 1&gt;</code>, and returns the string.</td>
+</tr>
+<tr class="even">
+<td><code>SWAP &lt;variable name&gt;, &lt;variable name&gt;</code></td>
+<td>Statement</td>
+<td>Exchanges the value of two variables.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t">— T —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>TAB (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Produces the specified spaces in PRINT instructions.</td>
+</tr>
+<tr class="even">
+<td><code>TAN (&lt;expression&gt;)</code></td>
+<td>Function</td>
+<td>Returns the tangent of <code>&lt;expression&gt;</code> in
+radians.</td>
+</tr>
+<tr class="odd">
+<td><code>TIME</code></td>
+<td>System variable</td>
+<td>Contains the value of the interval timer.</td>
+</tr>
+<tr class="even">
+<td><code>TRON</code></td>
+<td>Command</td>
+<td>Keeps displaying the line numbers of the program currently being
+executed.</td>
+</tr>
+<tr class="odd">
+<td><code>TROFF</code></td>
+<td>Command</td>
+<td>Cancels TRON and stops displaying the line numbers.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="u">— U —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>USR [&lt;number](&lt;argument&gt;)</code></td>
+<td>Function</td>
+<td>Calls the assembly language routine.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="v">— V —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>VAL (&lt;string expression&gt;)</code></td>
+<td>Function</td>
+<td>Converts <code>&lt;string expression&gt;</code> to a numerical value
+and returns its result.</td>
+</tr>
+<tr class="even">
+<td><code>VARPTR (&lt;variable name&gt;)</code></td>
+<td>Function</td>
+<td>Returns the address containing the variable.</td>
+</tr>
+<tr class="odd">
+<td><code>VARPTR (#&lt;filenumber&gt;)</code></td>
+<td>Function</td>
+<td>Returns the starting address of the file control block.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* VDP (&lt;register number&gt;)</code></strong></td>
+<td>System variable</td>
+<td>Writes/reads data to/from the VDP registers.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>* VPEEK (&lt;address&gt;)</code></strong></td>
+<td>Function</td>
+<td>Reads data from <code>&lt;address&gt;</code> in VRAM.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* VPOKE (&lt;address&gt;)</code></strong></td>
+<td>Statement</td>
+<td>Writes data to <code>&lt;address&gt;</code> in VRAM.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="w">— W —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>WAIT &lt;port number&gt;, &lt;expression 1&gt;[, &lt;expression 2&gt;]</code></td>
+<td>Statement</td>
+<td>Stops the execution until data of the input port grows to the
+specified value.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* WIDTH &lt;number&gt;</code></strong></td>
+<td>Statement</td>
+<td>Specifies the number of characters per line in the display
+screen.</td>
+</tr>
+</tbody>
+</table>
+<p>
+ 
+</p>
+<h3 id="instructions-of-msx-disk-basic">1.2 Instructions of MSX
+DISK-BASIC</h3>
+<p><strong>Note:</strong> Instructions marked with **“**“** have been
+added to version 2 of MSX DISK-BASIC and are not available in version
+1.</p>
+<h4 id="b-1">— B —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong><code>* BLOAD "&lt;filename&gt;"[{[, R] \| [, S]}[, &lt;offset&gt;]]</code></strong></td>
+<td>Command</td>
+<td>Loads the assembly language program or screen data from a file.</td>
+</tr>
+<tr class="even">
+<td><strong><code>* BSAVE "&lt;filename&gt;", &lt;start address&gt;, &lt;end address&gt;[, {&lt;execution address&gt; \| S}]</code></strong></td>
+<td>Command</td>
+<td>Saves the assembly language program or screen data in a file.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="c-1">— C —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>CLOSE [[#]&lt;filenumber&gt;[, [#]&lt;filenumber&gt;...]]</code></td>
+<td>Statement</td>
+<td>Closes the file specified by <code>&lt;filenumber&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><strong><code>** CALL CHDRV ("&lt;drive name&gt;:")</code></strong></td>
+<td>Command</td>
+<td>Sets the drive specified by <code>&lt;drive name&gt;</code> as the
+default drive.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>** CALL CHDIR ("&lt;directory path&gt;")</code></strong></td>
+<td>Command</td>
+<td>Changes to the directory specified by
+<code>&lt;directory path&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><code>CALL FORMAT</code></td>
+<td>Command</td>
+<td>Formats the floppy disk.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>** CALL MKDIR ("&lt;directory name&gt;")</code></strong></td>
+<td>Command</td>
+<td>Creates the directory with the name specified in
+<code>&lt;directory name&gt;</code> in the current directory.</td>
+</tr>
+<tr class="even">
+<td><strong><code>** CALL RAMDISK (&lt;size in kilobytes&gt;[, &lt;variable name&gt;])</code></strong></td>
+<td>Command</td>
+<td>Tries to crate the DOS 2 RAM disk of the specified size, and returns
+in the variable (if specified) the actual size of the RAM disk
+created.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>** CALL RMDIR ("&lt;directory name&gt;")</code></strong></td>
+<td>Command</td>
+<td>Deletes the directory specified in
+<code>&lt;directory name&gt;</code>. If the directory is not empty,
+“File already exists” error will be returned.</td>
+</tr>
+<tr class="even">
+<td><code>CALL SYSTEM</code></td>
+<td>Command</td>
+<td>Returns to MSX-DOS.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>** CALL SYSTEM [("&lt;filename&gt;")]</code></strong></td>
+<td>Command</td>
+<td>Returns to MSX-DOS and executes the DOS command
+<code>&lt;filename&gt;</code> if it is specified.</td>
+</tr>
+<tr class="even">
+<td><code>COPY "&lt;filename 1&gt;"[ TO "&lt;filename 2&gt;"]</code></td>
+<td>Command</td>
+<td>Copies the contents of <code>&lt;filename 1&gt;</code> to the file
+specified by <code>&lt;filename 2&gt;</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>CVD (&lt;8-byte string&gt;)</code></td>
+<td>Function</td>
+<td>Converts the string to the double precision real value and returns
+its result.</td>
+</tr>
+<tr class="even">
+<td><code>CVI (&lt;2-byte string&gt;)</code></td>
+<td>Function</td>
+<td>Converts the string to the integer value and returns its
+result.</td>
+</tr>
+<tr class="odd">
+<td><code>CVS (&lt;4-byte string&gt;)</code></td>
+<td>Function</td>
+<td>Converts the string to the single precision real value and returns
+its result.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="d-1">— D —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>DSKF (&lt;drive number&gt;)</code></td>
+<td>Function</td>
+<td>Returns the unused portions of the disk in clusters.</td>
+</tr>
+<tr class="even">
+<td><code>DSKI$ (&lt;drive number&gt;, &lt;sector number&gt;)</code></td>
+<td>Function</td>
+<td>Reads the specified sector of the specified drive to the memory area
+indicated by address &amp;HF351, and returns a null string.</td>
+</tr>
+<tr class="odd">
+<td><code>DSKO$ (&lt;drive number&gt;, &lt;sector number&gt;)</code></td>
+<td>Statement</td>
+<td>Writes 512 bytes starting from address indicated by &amp;HF351 to
+the specified sector of the specified drive.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="e-1">— E —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>EOF (&lt;filenumber&gt;)</code></td>
+<td>Function</td>
+<td>Checks if the file has ended and returns -1 if at the end of
+file.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="f-1">— F —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>FIELD [#]&lt;filenumber&gt;, &lt;field width&gt; AS &lt;string variable name&gt;[, &lt;field width&gt; AS &lt;string variable name&gt;...]</code></td>
+<td>Statement</td>
+<td>Assigns the string variable name to the random input/output
+buffer.</td>
+</tr>
+<tr class="even">
+<td><code>FILES ["&lt;filename&gt;"]</code></td>
+<td>Command</td>
+<td>Displays the name of the file matched with
+<code>&lt;filename&gt;</code> on the screen.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>** FILES ["&lt;filename&gt;"][,L]</code></strong></td>
+<td>Command</td>
+<td>Displays the name of the file matched with
+<code>&lt;filename&gt;</code> on the screen, and also the attributes and
+the size of the file if “L” is specified.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="g-1">— G —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>GET[#]&lt;filenumber&gt;[, &lt;record number&gt;]</code></td>
+<td>Statement</td>
+<td>Reads one record from the random file to the random input/output
+buffer.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="i-1">— I —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>INPUT #&lt;filenumber&gt;, &lt;variable name&gt;[, &lt;variable name&gt;...]</code></td>
+<td>Statement</td>
+<td>Reads data from the file.</td>
+</tr>
+<tr class="even">
+<td><code>INPUT$ (&lt;the number of characters&gt;[, [#]&lt;filenumber&gt;])</code></td>
+<td>Function</td>
+<td>Gets the string of the specified length from the file.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="k-1">— K —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>KILL "&lt;filename&gt;"</code></td>
+<td>Command</td>
+<td>Delets the file specified by <code>&lt;filename&gt;</code>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="l-1">— L —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>LFILES ["&lt;filename&gt;"]</code></td>
+<td>Command</td>
+<td>Sends the name of the file matched with
+<code>&lt;filename&gt;</code> to the printer.</td>
+</tr>
+<tr class="even">
+<td><strong><code>** LFILES ["&lt;filename&gt;"][,L]</code></strong></td>
+<td>Command</td>
+<td>Sends the name of the file matched with
+<code>&lt;filename&gt;</code> to the printer, and also the attributes
+and the size of the file if “L” is specified.</td>
+</tr>
+<tr class="odd">
+<td><code>LINE INPUT #&lt;file number&gt;, &lt;string variable name&gt;</code></td>
+<td>Statement</td>
+<td>Reads lines of data from the file to the string variable.</td>
+</tr>
+<tr class="even">
+<td><code>LOAD "&lt;filename&gt;"[, R]</code></td>
+<td>Command</td>
+<td>Loads the program into memory.</td>
+</tr>
+<tr class="odd">
+<td><code>LOC (&lt;filenumber&gt;)</code></td>
+<td>Function</td>
+<td>Returns the record number of the most recently accessed location of
+the file.</td>
+</tr>
+<tr class="even">
+<td><code>LOF (&lt;filenumber&gt;)</code></td>
+<td>Function</td>
+<td>Returns the size of the specified file in bytes.</td>
+</tr>
+<tr class="odd">
+<td><code>LSET &lt;string variable name&gt;=&lt;string expression&gt;</code></td>
+<td>Statement</td>
+<td>Stores data padded on the left in the random input/output
+buffer.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="m-1">— M —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>MAXFILES = &lt;the number of files&gt;</code></td>
+<td>Statement</td>
+<td>Declares the maximum number of files that can be opened.</td>
+</tr>
+<tr class="even">
+<td><code>MERGE "&lt;filename&gt;"</code></td>
+<td>Command</td>
+<td>Merges the program in memory with the program saved in ASCII
+format.</td>
+</tr>
+<tr class="odd">
+<td><code>MKD$ (&lt;double precision real value&gt;)</code></td>
+<td>Function</td>
+<td>Converts the double precision real value to the character code
+corresponding to the internal expression.</td>
+</tr>
+<tr class="even">
+<td><code>MKI$ (&lt;integer value&gt;)</code></td>
+<td>Function</td>
+<td>Converts the integer value to the character code corresponding to
+the internal expression.</td>
+</tr>
+<tr class="odd">
+<td><code>MKS$ (&lt;single precision real value&gt;)</code></td>
+<td>Function</td>
+<td>Converts the single precision real value to the character code
+corresponding to the internal expression.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="n-1">— N —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>NAME "&lt;filename 1&gt;" AS "&lt;filename 2&gt;"</code></td>
+<td>Command</td>
+<td>Renames the name of a file.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="o-1">— O —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>OPEN "&lt;filename&gt;"[FOR &lt;mode&gt;] AS #&lt;filenumber&gt;[LEN = &lt;record length&gt;]</code></td>
+<td>Statement</td>
+<td>Opens the file.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p-1">— P —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>PRINT #&lt;filenumber&gt;, [&lt;expression&gt;[{; \| ,}&lt;expression&gt;...]]</code></td>
+<td>Statement</td>
+<td>Sends data to the sequential file.</td>
+</tr>
+<tr class="even">
+<td><code>PRINT #&lt;filenumber&gt;, USING &lt;form&gt;; &lt;expression&gt;[{; \| ,}&lt;expression&gt;...]]</code></td>
+<td>Statement</td>
+<td>Sends data to the sequential file according to the form.</td>
+</tr>
+<tr class="odd">
+<td><code>PUT [#]&lt;filenumber&gt;[, &lt;record number&gt;]</code></td>
+<td>Statement</td>
+<td>Sends data of the random input/output buffer to the random
+file.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="r-1">— R —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>RSET &lt;string varibale name&gt;=&lt;string expression&gt;</code></td>
+<td>Statement</td>
+<td>Stores data padded on the right in the random input/output
+buffer.</td>
+</tr>
+<tr class="even">
+<td><code>RUN "&lt;filename&gt;"[, R]</code></td>
+<td>Command</td>
+<td>Loads a program from the disk and executes it.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="s-1">— S —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>SAVE "&lt;filename&gt;"[, A]</code></td>
+<td>Command</td>
+<td>Saves a program. The program is saved in ASCII format when “A” is
+specified.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="v-1">— V —</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Type</th>
+<th>Function or action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>VARPTR (#&lt;filenumber&gt;)</code></td>
+<td>Function</td>
+<td>Returns the starting address of the file control block.</td>
+</tr>
+</tbody>
+</table>
+<p>
+ 
+</p>
+<h2 id="differences-in-msx-basic-version-20">2. DIFFERENCES IN MSX
+BASIC VERSION 2.0</h2>
+<p>A great deal of functions in MSX BASIC version 2.0 have been added or
+modified when compared with MSX BASIC version 1.0. They are either the
+functions that are added or modified with the version-up of VDP (Video
+Display Processor) or the functions that are added or modified because
+of the various hardware features such as RAM disk, clock, or memory
+switch; especially, the alternation of VDP affects, most of the
+statement for the screen display.</p>
+<p>This section picks up these statements and indicates the additions or
+the modifications. In the following descriptions, “MSX1” means MSX BASIC
+version 1.0 and “MSX2” for MSX BASIC version 2.0.</p>
+<p>
+ 
+</p>
+<h3 id="additions-or-modifications-to-screen-mode">2.1 Additions or
+Modifications to Screen Mode</h3>
+<ul>
+<li><code>SCREEN &lt;screen mode&gt;[, &lt;sprite size&gt;[, &lt;key click switch&gt;[, &lt;cassette baud rate&gt;[, &lt;printer option&gt;[, &lt;interlace mode&gt;]]]]]</code></li>
+</ul>
+<p><code>&lt;Screen mode&gt;</code> and
+<code>&lt;interlace mode&gt;</code> have been modified.</p>
+<p><code>&lt;Screen mode&gt;</code> may be specified from 0 to 8. Modes
+from 0 to 3 are the same as MSX1 and the rest have been added. When
+specifying a screen mode, in BASIC it is called “SCREEN MODE”, which is
+somewhat different from “screen mode” which is used by VDP internally.
+<a
+href="#table-2.1-correspondances-of-basic-screen-screen-modes-and-vdp-screen-modes">Table
+2.1</a> shows these correspondences and meanings. The difference between
+screen modes 2 and 4 is only in the sprite display functions.</p>
+<h5
+id="table-2.1-correspondances-of-basic-screen-screen-modes-and-vdp-screen-modes"><em>Table
+2.1 Correspondances of BASIC screen (SCREEN) modes and VDP screen
+modes</em></h5>
+<pre><code>-----------------------------------------------------------------------------
+|              |             |                   Meaning                    |
+|     BASIC    |    VDP      |----------------------------------------------|
+|     mode     |    mode     |    Dots or     | Display colours |   Screen  |
+|              |             |   characters   | at a time       |   format  |
+|--------------+-------------+----------------+-----------------+-----------|
+| SCREEN 0 (1) | TEXT 1      |  40 x 24 chars |    2 from 512   | Text      |
+|--------------+-------------+----------------+-----------------+-----------|
+| SCREEN 0 (2) | TEXT 2      |  80 x 24 chars |    2 from 512   | Text      |
+|--------------+-------------+----------------+-----------------+-----------|
+| SCREEN 1     | GRAPHIC 1   |  32 x 24 chars |   16 from 512   | Text      |
+|--------------+-------------+----------------+-----------------+-----------|
+| SCREEN 2     | GRAPHIC 2   | 256 x 192 dots |   16 from 512   | High res. |
+|              |             |                |                 | graphics  |
+|--------------+-------------+----------------+-----------------+-----------|
+| SCREEN 3     | MULTICOLOUR |  64 x  48 dots |   16 from 512   | Low res.  |
+|              |             |                |                 | graphics  |
+|--------------+-------------+----------------+-----------------+-----------|
+| SCREEN 4     | GRAPHIC 3   | 256 x 192 dots |   16 from 512   | High res. |
+|              |             |                |                 | graphics  |
+|--------------+-------------+----------------+-----------------+-----------|
+| SCREEN 5     | GRAPHIC 4   | 256 x 212 dots |   16 from 512   | Bit map   |
+|              |             |                |                 | graphics  |
+|--------------+-------------+----------------+-----------------+-----------|
+| SCREEN 6     | GRAPHIC 5   | 512 x 212 dots |    4 from 512   | Bit map   |
+|              |             |                |                 | graphics  |
+|--------------+-------------+----------------+-----------------+-----------|
+| SCREEN 7     | GRAPHIC 6   | 512 x 212 dots |   16 from 512   | Bit map   |
+|              |             |                |                 | graphics  |
+|--------------+-------------+----------------+-----------------+-----------|
+| SCREEN 8     | GRAPHIC 7   | 256 x 212 dots |   256           | Bit map   |
+|              |             |                |                 | graphics  |
+-----------------------------------------------------------------------------</code></pre>
+<p>Specifying <code>&lt;interlace mode&gt;</code> enables to set the
+interlace functions of VDP (see <a
+href="#table-2.2-differences-of-display-function-in-the-interlace-mode">Table
+2.2</a>). In the alternate screen display mode, the display page
+specified in “SET PAGE” must be odd. In this case the display page and
+the page of which the number is smaller by one is displayed
+alternately.</p>
+<h5
+id="table-2.2-differences-of-display-function-in-the-interlace-mode"><em>Table
+2.2 Differences of display function in the interlace mode</em></h5>
+<pre><code>-----------------------------------------------------------------
+|  Interlace mode  |             Display function               |
+|------------------+--------------------------------------------|
+|        0         | Normal non-interlaced display (default)    |
+|        1         | Interlaced display                         |
+|        2         | Non interlaced, Even/Odd alternate display |
+|        3         | Interlaced, Even/Odd alternate display     |
+-----------------------------------------------------------------</code></pre>
+<ul>
+<li><code>SET PAGE &lt;display page&gt;, &lt;active page&gt;</code></li>
+</ul>
+<p>This statement is new. It allows users to set the page to display and
+the page to read and write data to. This is valid when the screen mode
+is between 5 and 8, and the value specified depends on the VRAM capacity
+and the screen mode (see <a
+href="#table-2.3-page-values-to-be-specified-depending-on-the-screen-mode-and-the-vram-capacity">Table
+2.3</a>).</p>
+<h5
+id="table-2.3-page-values-to-be-specified-depending-on-the-screen-mode-and-the-vram-capacity">Table
+2.3 Page values to be specified depending on the screen mode and the
+VRAM capacity</h5>
+<pre><code>------------------------------------------
+| Screen mode |  VRAM 64K  |  VRAM 128K  |
+|-------------+------------+-------------|
+|  SCREEN 5   |   0 to 1   |   0 to 3    |
+|  SCREEN 6   |   0 to 1   |   0 to 3    |
+|  SCREEN 7   |  Unusable  |   0 to 1    |
+|  SCREEN 8   |  Unusable  |   0 to 1    |
+------------------------------------------</code></pre>
+<p>See the <a href="Appendix5.html">VRAM map</a> in the APPENDIX for the
+page assignment on VRAM.</p>
+<p>
+ 
+</p>
+<h3 id="additions-or-modifications-for-the-colour-specification">2.2
+Additions or Modifications for the Colour Specification</h3>
+<ul>
+<li><code>COLOR [&lt;foreground colour&gt;[, &lt;background colour&gt;[, &lt;border colour&gt;]]]</code></li>
+</ul>
+<p>In MSX2, with its colour palette feature, the ranges and meanings of
+values specifying colours in the screen mode are different (see <a
+href="#table-2.4-colour-specifications-for-the-screen-mode">Table
+2.4</a>). The <code>&lt;background colour&gt;</code> except that of the
+text display changes when the CLS statement is executed. If the display
+mode is 0, specification of a <code>&lt;border colour&gt;</code> is
+ignored.</p>
+<p>The “border colour” in screen mode 6 has special meanings. <a
+href="#figure-2.2-bitwise-meanings-for-the-border-colour-on-screen-mode-6">Figure
+2.2</a> shows the bitwise meanings of <code>&lt;border colour&gt;</code>
+in the mode. In this mode, by changing the flag (bit 4), the colour of
+vertical lines at odd X-coordinates and the colour of those at even
+coordinates can be specified differently.</p>
+<p>When the flag is 0 (the value of border colour is one of the values
+from 0 to 15), different colours cannot be specified and the border
+colour is set as the colour of vertical odd lines. When the flag is 1
+(the value of border colour is one of the values from 16 to 31), the
+border colours are set as the colour of vertical odd lines and that of
+vertical even lines; when these two colours are different, the screen
+shows a vertically-striped pattern.</p>
+<h5
+id="figure-2.2-bitwise-meanings-for-the-border-colour-on-screen-mode-6"><em>Figure
+2.2 Bitwise meanings for the border colour on screen mode 6</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.2.png"
+alt="Figure 2.2" />
+<figcaption aria-hidden="true">Figure 2.2</figcaption>
+</figure>
+<ul>
+<li><code>COLOR = (&lt;palette number&gt;, &lt;red brightness&gt;, &lt;green brightness&gt;, &lt;blue brightness&gt;)</code></li>
+</ul>
+<p>This statement sets the colour of the specified palette. See <a
+href="#table-2.4-colour-specifications-for-the-screen-mode">Table
+2.4</a> for the specification of <code>&lt;palette number&gt;</code>.
+Note that nothing happens and no error occurs wwhen the screen mode is
+8, which has no palette feature. Though palette number 0 is ordinally
+fixed to a transparent colour (that is, border space is seen
+transparently), it can be dealt in the same way as other palettes by
+changing the register of VDP:</p>
+<pre><code>    VDP(9)=VDP(9) OR &amp;H20        (when dealing as with other palettes)
+    VDP(9)=VDP(9) AND &amp;HDF       (when fixing it to a transparent colour)</code></pre>
+<h5 id="table-2.4-colour-specifications-for-the-screen-mode"><em>Table
+2.4 Colour specifications for the screen mode.</em></h5>
+<pre><code>--------------------------------------------------------
+| Screen mode | Colour specification | Range of number |
+|-------------+----------------------+-----------------|
+|  SCREEN 0   |    Palette number    |     0 to 15     |
+|  SCREEN 1   |    Palette number    |     0 to 15     |
+|  SCREEN 2   |    Palette number    |     0 to 15     |
+|  SCREEN 3   |    Palette number    |     0 to 15     |
+|  SCREEN 4   |    Palette number    |     0 to 15     |
+|  SCREEN 5   |    Palette number    |     0 to 15     |
+|  SCREEN 6   |    Palette number    |     0 to 3      |
+|  SCREEN 7   |    Palette number    |     0 to 15     |
+|  SCREEN 8   |    Colour number     |     0 to 255    |
+--------------------------------------------------------</code></pre>
+<p>Brightness of each colour can be set to one of eight steps from 0 to
+7 and combinig them enables to display 512 colours; 8 (red) x 8 (green)
+x 8 (blue).</p>
+<ul>
+<li><code>COLOR=RESTORE</code></li>
+</ul>
+<p>This statement resets the colour palette register according to the
+contents of the colour palette storage table (see APPENDIX <a
+href="Appendix5.html">VRAM MAP</a>). For example, if image data written
+under unusual colour palette settings is BSAVEd, the original images
+cannot be reproduced because BLOADing the data does not change the
+colour palettes. Therefore, the image data should be BSAVEd with the
+colour palette storage table. To obtain the colours of the original
+images, BLOAD the data and reset the palettes with the COLOR=RESTORE
+instruction.</p>
+<ul>
+<li><code>COLOR [=NEW]</code></li>
+</ul>
+<p>This statement initialises the colour palette to the same state as
+when the power of the computer is turned on (see <a
+href="#table-2.5-initial-colours-of-colour-palettes-and-palette-setting-values">Table
+2.5</a>). It is a good idea to place this statement at the beginning and
+the end of the program.</p>
+<h5
+id="table-2.5-initial-colours-of-colour-palettes-and-palette-setting-values"><em>Table
+2.5 Initial colours of colour palettes and palette setting
+values</em></h5>
+<pre><code>------------------------------------------------------------------
+| Palette |    Colour     | Brightness | Brightness | Brightness |
+| number  |               |  of red    |   of blue  |  of green  |
+|---------+---------------+------------+------------+------------|
+|    0    | transparent   |     0      |     0      |     0      |
+|    1    | black         |     0      |     0      |     0      |
+|    2    | bright green  |     1      |     1      |     6      |
+|    3    | light green   |     3      |     3      |     7      |
+|    4    | deep blue     |     1      |     7      |     1      |
+|    5    | bright blue   |     2      |     7      |     3      |
+|    6    | deep red      |     5      |     1      |     1      |
+|    7    | light blue    |     2      |     7      |     6      |
+|    8    | bright red    |     7      |     1      |     1      |
+|    9    | light red     |     7      |     3      |     3      |
+|   10    | bright yellow |     6      |     1      |     6      |
+|   11    | pale yellow   |     6      |     3      |     6      |
+|   12    | deep green    |     1      |     1      |     4      |
+|   13    | purple        |     6      |     5      |     2      |
+|   14    | grey          |     5      |     5      |     5      |
+|   15    | white         |     7      |     7      |     7      |
+------------------------------------------------------------------</code></pre>
+<p>
+ 
+</p>
+<h3 id="additions-or-modifications-for-the-character-display">2.3
+Additions or Modifications for the Character Display</h3>
+<ul>
+<li><code>LOCATE [&lt;X-coordinate&gt;[, &lt;Y-coordinate&gt;[, &lt;cursor switch&gt;]]]</code></li>
+</ul>
+<p>This statement specifies the location to display a character in the
+text display screen.</p>
+<p>Since an 80-character display feature has been added to the screen
+mode 0, the X-coordinate value can be specified up to 79.</p>
+<p>
+ 
+</p>
+<h3 id="additions-or-modifications-for-the-graphics-display">2.4
+Additions or Modifications for the Graphics Display</h3>
+<ul>
+<li><code>LINE [{(X1,Y1) | STEP(X1,Y1)}] - {(X2,Y2) | STEP(X2,Y2)}[, &lt;colour&gt; [, {B|BF}[, &lt;logical operation&gt;]]]</code></li>
+<li><code>PSET {(X,Y) | STEP(X,Y)}[, &lt;colour&gt;[, &lt;logical operation&gt;]]</code></li>
+<li><code>PRESET {(X,Y) | STEP(X,Y)}[, &lt;colour&gt;[, &lt;logical operation&gt;]]</code></li>
+</ul>
+<p>The specifiable coordinate range of these statements varies according
+to the screen mode (see <a
+href="#table-2.6-range-of-coordinates-for-each-screen-mode">Table
+2.6</a>).</p>
+<h5 id="table-2.6-range-of-coordinates-for-each-screen-mode"><em>Table
+2.6 Range of coordinates for each screen mode</em></h5>
+<pre><code>-------------------------------------------------
+| Screen mode |  X-coordinate  |  Y-coordinate  |
+|-------------+----------------+----------------|
+|  SCREEN 2   |    0 to 255    |    0 to 191    |
+|  SCREEN 3   |    0 to 255    |    0 to 191    |
+|  SCREEN 4   |    0 to 255    |    0 to 191    |
+|  SCREEN 5   |    0 to 255    |    0 to 211    |
+|  SCREEN 6   |    0 to 511    |    0 to 211    |
+|  SCREEN 7   |    0 to 511    |    0 to 211    |
+|  SCREEN 8   |    0 to 255    |    0 to 211    |
+-------------------------------------------------</code></pre>
+<p>The logical operation feature is new. When
+<code>&lt;logical operation&gt;</code> is specified, a logical operation
+is done between the specified <code>&lt;colour&gt;</code> and the
+original colour, and the colour of its result will be used to draw.
+Logical operation types are listed in <a
+href="#table-2.7-logical-operation">Table 2.7</a>.
+<code>&lt;Colour&gt;</code> is specified by the palette number, except
+for screen mode 8.</p>
+<h5 id="table-2.7-logical-operation"><em>Table 2.7 Logical
+operation</em></h5>
+<pre><code>-----------------------------------------------------------------------------
+|    Logical operation    |               Function to draw                  |
+|-------------------------+-------------------------------------------------|
+| PSET (default) ,TPSET   | Use &quot;specified colour&quot;                          |
+| PRESET         ,TPRESET | Use &quot;NOT (specified colour)&quot;                    |
+| XOR            ,TXOR    | Use &quot;(background colour) XOR (specified colour)&quot;|
+| OR             ,TOR     | Use &quot;(background colour) OR (specified colour)&quot; |
+| AND            ,AND     | Use &quot;(background colour) AND (specified colour)&quot;|
+-----------------------------------------------------------------------------</code></pre>
+<p><strong>Note:</strong> The list above assumes that
+<code>&lt;colour&gt;</code> is (specified colour) and that the original
+colour of the place to be drawn is (background colour). Specifying a
+logical operation preceded by “T” causes nothing to be done when
+<code>&lt;colour&gt;</code> is transparent (colour 0).</p>
+<ul>
+<li><code>CIRCLE {(X,Y) | STEP(X,Y)},&lt;radius&gt;[, &lt;colour&gt;[, &lt;start angle&gt;[, &lt;end angle&gt;[, &lt;proportion&gt;]]]]</code></li>
+</ul>
+<p>The coordinate range to be specified depends on the screen mode (see
+<a href="#table-2.6-range-of-coordinates-for-each-screen-mode">Table
+2.6</a>). <code>&lt;colour&gt;</code> is specified by the palette
+number, except for screen mode 8.</p>
+<ul>
+<li><code>PAINT {(X,Y) | STEP(X,Y)}[, &lt;colour&gt;[, &lt;border colour&gt;]]</code></li>
+</ul>
+<p>The coordinate range to be specified depends on the screen mode (see
+<a href="#table-2.6-range-of-coordinates-for-each-screen-mode">Table
+2.6</a>). <code>&lt;Colour&gt;</code> is specified by the palette
+number, except for screen mode 8. The specification of
+<code>&lt;border color&gt;</code> is invalid in screen modes 2 and
+4.</p>
+<p>
+ 
+</p>
+<h3 id="additions-or-modifications-for-vdp-access">2.5 Additions or
+modifications for VDP access</h3>
+<ul>
+<li><code>BASE (&lt;expression&gt;)</code></li>
+</ul>
+<p>This system variable contains the starting address of each table
+assigned to VRAM. The contents of <code>&lt;expression&gt;</code> and
+the screen mode tables correspond as listed in <a
+href="#table-2.8-correspondences-between-base-set-values-and-vram-table">Table
+2.8</a>.</p>
+<p>The starting address of the table can be read for each
+<code>&lt;expression&gt;</code>, but can be written only when
+<code>&lt;expression&gt;</code> is a value from 0 to 19 (that is, from
+screen mode 0 to screen mode 3).</p>
+<p>Note that the table of screen mode 4 changes as you change the table
+address of screen mode 2.</p>
+<p>Address returned for screen mode from 5 to 8 is the offset value from
+the starting address of the active page.</p>
+<h5
+id="table-2.8-correspondences-between-base-set-values-and-vram-table"><em>Table
+2.8 Correspondences between BASE set values and VRAM table</em></h5>
+<pre><code>------------------------------------------------------
+| Expression | Screen mode |         Table           |
+|------------+-------------+-------------------------|
+|     0      |      0      | Pattern name table      |
+|     1      |      0      | N/A                     |
+|     2      |      0      | Pattern generator table |
+|     3      |      0      | N/A                     |
+|     4      |      0      | N/A                     |
+|     5      |      1      | Pattern name table      |
+|     6      |      1      | Colour table            |
+|     7      |      1      | Pattern generator table |
+|     8      |      1      | Sprite attribute table  |
+|     9      |      1      | Sprite generator table  |
+|    10      |      2      | Pattern name table      |
+|    11      |      2      | Colour table            |
+|    12      |      2      | Pattern generator table |
+|     .      |      .      |            .            |
+      .             .                   .
+      .             .                   .
+|            |             |                         |
+|    43      |      8      | Sprite attribute table  |
+|    44      |      8      | Sprite generator table  |
+------------------------------------------------------</code></pre>
+<ul>
+<li><code>VDP (&lt;n&gt;)</code></li>
+</ul>
+<p>This allows the value of VDP register to be read and written.
+<code>&lt;n&gt;</code> is slightly different from the actual VDP
+register number. Their correspondances are listed in <a
+href="#table-2.9-correspondances-with-vdp-register">Table 2.9</a>.</p>
+<h5 id="table-2.9-correspondances-with-vdp-register"><em>Table 2.9
+Correspondances with VDP register</em></h5>
+<pre><code>---------------------------------------------------
+|    n     |  VDP register number   | Access mode |
+|----------+------------------------+-------------|
+|  0 to 7  | 0 to 7 (same as MSX1)  | Read/write  |
+|    8     |   Status register 0    | Read only   |
+|  9 to 24 |        8 to 23         | Read/write  |
+| 33 to 47 |       32 to 46         | Write only  |
+| -1 to -9 | Status register 1 to 9 | Read only   |
+---------------------------------------------------</code></pre>
+<ul>
+<li><code>VPEEK (&lt;address&gt;)</code></li>
+<li><code>VPOKE &lt;address&gt;, &lt;data&gt;</code></li>
+</ul>
+<p>When the screen mode is from 5 to 8, the offset value from the
+starting address of the active page should be set for
+<code>&lt;address&gt;</code>. Valid range for the
+<code>&lt;address&gt;</code> value is from 0 to 65535 and the valid
+range for the data value is from 0 to 255.</p>
+<ul>
+<li><code>BSAVE &lt;filename&gt;, &lt;start address&gt;, &lt;end address&gt;, S</code></li>
+<li><code>BLOAD &lt;filename&gt; ,S</code></li>
+</ul>
+<p>These are statements of DISK BASIC, used to save/load the contents of
+VRAM to/from disk files. Both can be used in any screen mode, note,
+however, that only the active pages are valid when the screen mode is
+from 5 to 8. No cassette tapes can be used. Valid value range of
+<code>&lt;address&gt;</code> is from -32768 to -2, or from 0 to 65534
+(&amp;HFFFE).</p>
+<ul>
+<li><code>COPY (X1,Y1) - (X2,Y2)[, &lt;source page&gt;] TO (X3,Y3)[, &lt;destination page&gt; [, &lt;logical operation&gt;]]</code></li>
+<li><code>COPY (X1,Y1) - (X2,Y2)[, &lt;source page&gt;] TO {&lt;array variable name&gt; | &lt;filename&gt;}</code></li>
+<li><code>COPY {&lt;array variable name&gt; | &lt;filename&gt;}[, &lt;direction&gt;] TO (X3,Y3)[, &lt;destination page&gt;[, &lt;logical operation&gt;]]</code></li>
+<li><code>COPY &lt;filename&gt; TO &lt;array variable name&gt;</code></li>
+<li><code>COPY &lt;array variable name&gt; TO &lt;filename&gt;</code></li>
+</ul>
+<p>The COPY statements transfer screen data and are valid when the
+screen mode is from 5 to 8. VRAM, array variables, and disk files can be
+used with these statements, and data can be transferred among these at
+will.</p>
+<p>(X1,Y1) - (X2,Y2) means that the rectangular area, with a diagonal
+formed by these two coordinates is to be transferred.
+<code>&lt;Source page&gt;</code> and
+<code>&lt;destination page&gt;</code> indicate the page to be
+transferred from and the page to be transferred to, respectively, and if
+these pages are omitted, the active pages are assumed.
+<code>&lt;Direction&gt;</code> indicates the direction for writing the
+screen data to the screen, and is specified by a number from 0 to 3 (see
+<a href="#figure-2.3-directions-for-writing-the-screen-data">Figure
+2.3</a>).</p>
+<h5 id="figure-2.3-directions-for-writing-the-screen-data"><em>Figure
+2.3 Directions for writing the screen data</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.3.png"
+alt="Figure 2.3" />
+<figcaption aria-hidden="true">Figure 2.3</figcaption>
+</figure>
+<p><code>&lt;Array variable&gt;</code> is of the integer type, or single
+precision real type, or double precision real type. It should be
+prepared with enough area to get the screen data. Its size can be
+calculated by <a href="#expression-1">Expression 1</a> as shown below.
+<code>&lt;Pixel size&gt;</code> is the number of bits to be used to
+express one dot on the screen. It is 4 when the screen mode is 5 or 7, 2
+for mode 6, and 8 for mode 8. Screen data is stored in the format shown
+in <a href="#figure-2.4-screen-data-format">Figure 2.4</a>.</p>
+<h5 id="expression-1"><em>Expression 1</em></h5>
+<pre><code>INT ((&lt;pixel size&gt;*(ABS(X2-X1)+1)*(ABS(Y2-Y1)+1)+7)/8)+4 bytes</code></pre>
+<h5 id="figure-2.4-screen-data-format"><em>Figure 2.4 Screen data
+format</em></h5>
+<pre><code>------------------------------------
+| horizontal width low-order byte  | 0
+|----------------------------------|
+| horizontal width high-order byte | 1
+|----------------------------------|
+| vertical height low-order byte   | 2
+|----------------------------------|
+| vertical height high-order byte  | 3
+|----------------------------------|
+|                                  | 4
+|                                  | .
+|      screen data (*)             | .
+|                                  | .
+|                                  | n bytes
+------------------------------------
+
+(*) If the length of data cannot be divided by byte, excess bits are to be 0.</code></pre>
+<p><code>&lt;Logical operation&gt;</code> specifies a logical operation
+between the data which resides on the destination and the data to be
+transferred. See <a href="(#table-2.7-logical-operation)">Table 2.7</a>
+for the parameters to specify.</p>
+<p>When operations preceded by “T” are specified, the transparent
+portions of the source will not be transferred.</p>
+<p>
+ 
+</p>
+<h3 id="additions-or-modifications-for-sprite">2.7 Additions or
+Modifications for Sprite</h3>
+<p>The sprites used in screen mode 4-8 of MSX2 are called sprite mode 2,
+which has upgraded a great deal as compared with MSX1. On MSX1, for
+example, one sprite could treat only one colour, while in this mode of
+MSX2 different colours can be specified for each horizontal line and so
+multi-coloured characters can be realised with one sprite. Additionally,
+it is a good idea to combine two sprites as though they were one sprite
+to paint each dot with different colours. And, on MSX1, when more than
+five sprites are arrayed on a horizontal line, the sprites after the
+fifth one were not displayed, but on MSX2 up to eight sprites can be
+displayed, so a higher flexibility is offered.</p>
+<p>Colours which can be specified for sprites are shown in <a
+href="#table-2.4-colour-specifications-for-the-screen-mode">Table
+2.4</a> (colour statement) except for screen mode 8. The sprite in
+screen mode 8, not capable of using the palette, uses the colour number
+for the specification, and only 16 colours can be used (see <a
+href="#table-2.10-sprite-colours-in-screen-mode-8">Table 2.10</a>).</p>
+<h5 id="table-2.10-sprite-colours-in-screen-mode-8"><em>Table 2.10
+Sprite colours in screen mode 8</em></h5>
+<pre><code>-------------------------------------------------------------------------
+| 0: Black        | 1: Deep Blue    | 2: Deep Red     | 3: Deep Purple  |
+|-----------------+-----------------+-----------------+-----------------|
+| 4: Deep Green   | 5: Turquoise    | 6: Olive        | 7: Grey         |
+|-----------------+-----------------+-----------------+-----------------|
+| 8: Light Orange | 9: Blue         | 10: Red         | 11: Purple      |
+|-----------------+-----------------+-----------------+-----------------|
+| 12: Green       | 13: Light Blue  | 14: Yellow      | 15: White       |
+-------------------------------------------------------------------------</code></pre>
+<ul>
+<li><code>PUT SPRITE &lt;sprite plane number&gt;[, {(X,Y) | STEP(X,Y)}[, &lt;colour&gt;[, &lt;sprite pattern number&gt;]]]</code></li>
+</ul>
+<p>In screen modes 1 through 3, Y-coordinate was 209 for erasing the
+display of the specified sprite and was 208 for erasing the displays of
+the specified sprite and all sprites following it, but in screen modes 4
+through 8, where the limit of Y-coordinate has been increased to 212
+dots, the values to be specified are now 217 and 216, respectively.</p>
+<ul>
+<li><code>COLOR SPRITE$ (&lt;sprite plane number&gt;) = &lt;string expression&gt;</code></li>
+</ul>
+<p>This statement specifies a colour for each horizontal line (see <a
+href="#figure-2.5-relation-of-the-sprite-and-string-expression">Figure
+2.5</a>).</p>
+<p><code>&lt;String expression&gt;</code> consists of one to sixteen
+characters. Bits 0 throgh 3 of the character’s ASCII code are used for
+the colour specification, and bits 4 throgh 7 are used to specify each
+function of the sprite (see <a
+href="#table-2.11-bitwise-meanings-of-string-expression">Table
+2.11</a>). These specifications are valid only for screen modes 4
+through 8.</p>
+<pre><code>COLOR SPRITE$ = CHR$ (colour of the first line) + CHR$ (colour of the second line) + ...... + CHR$ (colour of the eight line)</code></pre>
+<h5
+id="figure-2.5-relation-of-the-sprite-and-string-expression"><em>Figure
+2.5 Relation of the sprite and
+<code>&lt;string expression&gt;</code></em></h5>
+<figure>
+<img
+src="../pics/Figure%202.5.png"
+alt="Figure 2.5" />
+<figcaption aria-hidden="true">Figure 2.5</figcaption>
+</figure>
+<h5 id="table-2.11-bitwise-meanings-of-string-expression"><em>Table 2.11
+Bitwise meanings of string expression</em></h5>
+<pre><code>-------------------------------------------------------------------------
+|    b7    | If 1, move the sprite to left by 32 dots.                  |
+|----------+------------------------------------------------------------|
+|          | If 1, move the sprites of the successive planes together.  |
+|    b6    | The priority and conflict of sprites are ignored, and when |
+|          | sprites are piled up, they are displayed in the colour     |
+|          | which is OR-ed with their colour numbers. *                |
+|----------+------------------------------------------------------------|
+|    b5    | If 1, the conflict of sprites are ignored.                 |
+|----------+------------------------------------------------------------|
+|    b4    | Unused.                                                    |
+|----------+------------------------------------------------------------|
+| b0 to b3 | Palette number.                                            |
+-------------------------------------------------------------------------</code></pre>
+<ul>
+<li><p>For example, assuming that bit 6 of sprite plane 1 is “0” and bit
+6 of sprite plane 2 is “1”, only by moving sprite plane 1, will sprite
+plane 2 be displayed displayed to be piled at the same
+location.</p></li>
+<li><p><code>COLOR SPRITE (&lt;sprite plane number&gt;) = &lt;expression&gt;</code></p></li>
+</ul>
+<p>This statement sets the whole sprite of the specified plane to the
+<code>&lt;expression&gt;</code>, this uses
+<code>&lt;expression&gt;</code> for colour specification. The format of
+the colour specification is the same as shown in <a
+href="#table-2.11-bitwise-meanings-of-string-expression">Table 2.11</a>,
+but the specification for b7 is disabled. These are valid for screen
+modes 4 through 8.</p>
+<p>
+ 
+</p>
+<h3 id="additions-for-optional-features">2.8 Additions for Optional
+Features</h3>
+<ul>
+<li><code>SET VIDEO [&lt;mode&gt;[, &lt;Ym&gt;[, &lt;CB&gt;[, &lt;sync&gt;[, &lt;voice&gt;[, &lt;video input&gt;[, &lt;AV control&gt;]]]]]]]</code></li>
+</ul>
+<p>This statement is for the superimposer or the digitiser which are
+optional, so it can be used only for machines which have these
+features.</p>
+<p><code>&lt;Mode&gt;</code> sets the superimposing mode and can be set
+to the value listed in <a
+href="#table-2.12-input-values-for-set-video-mode">Table 2.12</a>.</p>
+<p>When <code>&lt;Ym&gt;</code> is 1, the brightness of the television
+is halved.</p>
+<p>When <code>&lt;CB&gt;</code> is 1, the colour bus of VDP is prepared
+for input, and, when 0, it is prepared for output.</p>
+<p>When <code>&lt;sync&gt;</code> is 1, “external sync” is selected,
+and, when 0, “internal sync” is selected.</p>
+<p><code>&lt;Voice&gt;</code> specifies whether to mix external signal
+for output, and values are listed in <a
+href="#table-2.13-input-values-for-set-video-voice">Table 2.13</a>.</p>
+<p><code>&lt;Video input&gt;</code> is used to alternate the input of
+external video signals. When it is 0, the RGB multiconnector is
+selected; when it is 1, external video signal connector is selected.</p>
+<p><code>&lt;AV control</code>&gt; specifies AV control terminal output
+of the RGB multiconnector. When it is 0, the output is OFF; when it is
+1, the output is ON.</p>
+<h5 id="table-2.12-input-values-for-set-video-mode."><em>Table 2.12
+Input values for SET VIDEO <code>&lt;mode&gt;</code>.</em></h5>
+<pre><code>----------------------------------------
+| Mode | S1 | S2 | TP | Display screen |
+|------+----+----+----+----------------|
+|  0   | 0  | 0  | 0  | Computer       |
+|  1   | 0  | 1  | 1  | Computer       |
+|  2   | 0  | 1  | 0  | Superimpose    |
+|  3   | 1  | 0  | 0  | Television     |
+----------------------------------------</code></pre>
+<p><strong>Note:</strong> In the case of mode 0, external sync cannot be
+used. In other modes the compoalte output of VDP is not available. S1,
+S0, and TP are the names of flags in the VDP register.</p>
+<h5 id="table-2.13-input-values-for-set-video-voice"><em>Table 2.13
+Input values for SET VIDEO <code>&lt;voice&gt;</code></em></h5>
+<pre><code>----------------------------------------------
+| Voice | Function for external voice signal |
+|-------+------------------------------------|
+|   0   | No mixing                          |
+|   1   | Right channel mixed                |
+|   2   | Left channel mixed                 |
+|   3   | Both channels mixed                |
+----------------------------------------------</code></pre>
+<ul>
+<li><code>COPY SCREEN [&lt;mode&gt;]</code></li>
+</ul>
+<p>This statement is used for writing data from the colour bus to VRAM,
+for example, after digitising. This is valid for screen modes 5 to
+8.</p>
+<p>In mode 0, one field of signals is digitised and written to the
+display page; in mode 1, two successive fields (that is, one frame) of
+signals are written to (display page - 1)th page and the display page,
+so the display page should be an odd page when the mode is 1. The
+default mode is 0.</p>
+<p>
+ 
+</p>
+<h3 id="additions-for-timer-features">2.9 Additions for Timer
+Features</h3>
+<ul>
+<li><code>GET DATE &lt;string variable name&gt; [,A]</code></li>
+</ul>
+<p>This statement is for reading the date from the timer and assigning
+it to the string variable. The format of date to be read is as
+follows:</p>
+<pre><code>YY/MM/DD        (YY = lower two digits of year, MM = month, DD = day)</code></pre>
+<p>e.g.) 85/03/23 (March 23, 1985)</p>
+<p>When option A is specified, the alarm date is read.</p>
+<ul>
+<li><code>SET DATE &lt;string expression&gt;[, A]</code></li>
+</ul>
+<p>This statement sets date to timer. The form of parameter and option
+is the same as “GET DATE”</p>
+<p>e.g.) SET DATE “85/03/23”</p>
+<ul>
+<li><code>GET TIME &lt;string variable&gt;[, A]</code></li>
+</ul>
+<p>This statement is for reading time from the timer and assigning it to
+a string variable. The form of time to be read is as follows:</p>
+<pre><code>HH:MM:SS        (HH = hour, MM = minute, SS = second)</code></pre>
+<p>e.g.) 22:15:00 (22 hours 15 minutes 0 seconds)</p>
+<p>When A is specified, the time for the alarm is read.</p>
+<ul>
+<li><code>SET TIME &lt;string expression&gt;[, A]</code></li>
+</ul>
+<p>This statement sets the time to the timer. The form of parameter and
+option is the same as “GET TIME”.</p>
+<p>e.g.) SET TIME “22:15:00”</p>
+<ul>
+<li>The Alarm</li>
+</ul>
+<p>Since the alarm feature is optional, the action taken at the
+specified time depends on the machine (ordinarily nothing happens).</p>
+<p>When the alarm is to be set in both “SET DATE” and “SET TIME”, “SET
+TIME” should be done first (when “SET TIME” is done, date of the alarm
+set by “SET DATE” will be erased).</p>
+<p>The minimum setting for alarm is in minutes (setting in seconds is
+ignored).</p>
+<p>
+ 
+</p>
+<h3 id="additions-for-memory-switch">2.10 Additions for Memory
+Switch</h3>
+<p>Using “SET” instructions, various settings described below can be
+stored to the battery-powered RAM in CLOCK-IC. Settings based on these
+are done automatically at system startup (when the system is powered or
+reset). “SET TITLE”, “SET PROMPT”, and “SET PASSWORD” use the same RAM,
+so only the most recent instruction is valid.</p>
+<ul>
+<li><code>SET ADJUST (&lt;X-coordinate offset&gt;, &lt;Y-coordinate offset&gt;)</code></li>
+</ul>
+<p>This statement sets the location to display on the screen. The
+coordinate offset is from -7 to 8.</p>
+<ul>
+<li><code>SET BEEP &lt;timbre&gt;, &lt;volume&gt;</code></li>
+</ul>
+<p>This statement sets BEEP sound. <code>&lt;Timbre&gt;</code> and
+<code>&lt;volume&gt;</code> are from 1 to 4.</p>
+<p><a href="#table-2.14-input-values-for--of-set-beep">Table 2.14</a>
+shows the correspondance of <code>&lt;timbre&gt;</code> and to the
+actual sound.</p>
+<h5 id="table-2.14-input-values-for-of-set-beep"><em>Table 2.14 Input
+values for <timbre> of SET BEEP</em></h5>
+<pre><code>------------------------------------------
+| Timbre |            Sound              |
+|--------+-------------------------------|
+|   1    | High tone beep (same as MSX1) |
+|   2    | Low tone beep                 |
+|   3    | 2 - tone beep                 |
+|   4    | 3 - tone beep                 |
+------------------------------------------</code></pre>
+<ul>
+<li><code>SET TITLE &lt;string expression&gt;[, &lt;title colour&gt;]</code></li>
+</ul>
+<p>This statement specifies the title and the colour of the initial
+screen at system startup. <code>&lt;Title&gt;</code> is set by a string
+of up to 6 characters and <code>&lt;colour&gt;</code> is one of the
+values on <a href="#table-2.15-available-colours-in-set-title">Table
+2.15</a>. When <code>&lt;title&gt;</code> is 6 characters, keyboard
+input is awaited just after the title screen is displayed.</p>
+<h5 id="table-2.15-available-colours-in-set-title"><em>Table 2.15
+Available colours in SET TITLE</em></h5>
+<pre><code>-----------------------------------------------------
+| Color         |   1    |   2    |   3    |   4    |
+|---------------+--------+--------+--------+--------|
+| Screen color  | Blue   | Green  | Red    | Orange |
+-----------------------------------------------------</code></pre>
+<ul>
+<li><code>SET PROMPT &lt;prompt&gt;</code></li>
+</ul>
+<p>This statement sets the prompt. <code>&lt;Prompt&gt;</code> can have
+up to 6 characters.</p>
+<ul>
+<li><code>SET PASSWORD &lt;password&gt;</code></li>
+</ul>
+<p>This statement sets a system password. <code>&lt;Password&gt;</code>
+is a string expression up to 255 characters. Once this statement is
+done, input of the password is requested for invoking the system. When
+the correct password is given, the system is normally invoked;
+otherwise, correct password input is requested. When the system is
+invoked by pressing both graphic key and stop key, no password input is
+requested (in this case, the password setting has been done by the key
+cartridge; however, password input is always required for system
+startup). The password is disabled by specifying a null character in SET
+TITLE.</p>
+<ul>
+<li><code>SET SCREEN</code></li>
+</ul>
+<p>This statement records the current parameters of the “SCREEN”
+statement. At the system startup, they are automatically set. Items to
+be recorded are the following:</p>
+<pre><code>Screen number of text mode                      Key click switch
+Screen width of text mode                       Printer option
+Foreground, background, and border colours      Cassette baud rate
+Function key switch                             Display mode</code></pre>
+<p>
+ 
+</p>
+<h3 id="additions-for-ram-disk">2.11 Additions for RAM Disk</h3>
+<p>On MSX1 RAM from 0000H to 7FFFH was used only by DOS. On MSX2,
+however, this portion can be used as a RAM disk of up to 32K bytes. The
+format of the file name for RAM disk is described below, where
+<code>&lt;filename&gt;</code> is a string which consists of 1 to 8
+characters and <code>&lt;extension&gt;</code> is one which consists of 1
+to 3 characters. Note that “;” (colon), “.” (period), control characters
+of character codes 00H-1FH, and graphic symbols consisting of two bytes
+cannot be used.</p>
+<pre><code>    MEM: &lt;filename&gt;[.&lt;extension&gt;]</code></pre>
+<p>The following are executable operations for the RAM disk:</p>
+<h4 id="loadsave-a-basic-program-always-saved-in-ascii-format">1.
+Load/save a BASIC program (always saved in ASCII format)</h4>
+<pre><code>    SAVE, LOAD, RUN, MERGE</code></pre>
+<p>When any of the above commands is executed from the program, control
+returns to the command level.</p>
+<h4 id="readwrite-a-sequential-file">2. Read/write a sequential
+file</h4>
+<pre><code>    OPEN, CLOSE
+    PRINT #, PRINT USING #
+    INPUT #, LINE INPUT #, INPUT$
+    EOF, LOC, LOF</code></pre>
+<p>The RAM disk does not support the following instructions:</p>
+<ol type="1">
+<li>Random file Read/Write</li>
+<li>BLOAD, BSAVE</li>
+<li>COPY</li>
+</ol>
+<ul>
+<li><code>CALL MEMINI [(&lt;size&gt;)]</code></li>
+</ul>
+<p>This statement specifies the amount of memory to be used as a RAM
+disk, initialises the RAM disk, and deletes all files. When the RAM disk
+is to be used, this statement should always be executed.</p>
+<p><code>&lt;Size&gt;</code> is “the amount of memory to be used as RAM
+disk minus 1”. By default, the maximum size is allocated for RAM disk.
+“CALL MEMINI(0)” causes the RAM disk feature to be disabled.</p>
+<ul>
+<li><code>CALL MFILES</code></li>
+</ul>
+<p>This statement displays file names on the RAM disk.</p>
+<ul>
+<li><code>CALL MKILL ("&lt;filename&gt;")</code></li>
+</ul>
+<p>This statement deletes the specified file.</p>
+<ul>
+<li><code>CALL MNAME ("&lt;old filename&gt;" AS "&lt;new filename&gt;")</code></li>
+</ul>
+<p>This statement renames the specified file.</p>
+<p>
+ 
+</p>
+<h3 id="other-additions">2.12 Other Additions</h3>
+<ul>
+<li><code>PAD (&lt;expression&gt;)</code></li>
+</ul>
+<p>This function returns status to touch pad (touch panel), light pen,
+mouse, or track ball.</p>
+<p>When <code>&lt;expression&gt;</code> is 0 to 7, it returns the status
+to touch pad as on MSX1, and, when <code>&lt;expression&gt;</code> is 8
+to 11, it returns the status to light pen. Since the coordinates and the
+value of the switch are read when “PAD(8)” is executed, other data
+should be read after confirming that the value of PAD(8) is -1 (see <a
+href="#table-2.16-expression-returning-status-to-light-pen">Table
+2.16</a>).</p>
+<h5 id="table-2.16-expression-returning-status-to-light-pen"><em>Table
+2.16 <code>&lt;Expression&gt;</code> returning status to light
+pen</em></h5>
+<pre><code>---------------------------------------------------------------------
+| Expression |                 The value returned                   |
+|------------+------------------------------------------------------|
+|      8     | -1 when data of light open is valid; otherwise, 0    |
+|      9     | X - coordinate of light pen                          |
+|     10     | Y - coordinate of light pen                          |
+|     11     | -1 when switch of light pen is pressed; otherwise, 0 |
+---------------------------------------------------------------------</code></pre>
+<p>This statement returns the status of the mouse or the track ball
+connected to port 1 when <code>&lt;expression&gt;</code> is 12 to 15 or
+connected to port 2 when it is 16 to 19 (see <a
+href="#table-2.17-expression-returning-status-to-mouse-or-track-ball">Table
+2.17</a>). The mouse and track ball are automatically distinguished from
+each other.</p>
+<h5
+id="table-2.17-expression-returning-status-to-mouse-or-track-ball"><em>Table
+2.17 <code>&lt;Expression&gt;</code> returning status to mouse or track
+ball</em></h5>
+<pre><code>---------------------------------------
+| Expression |   The value returned   |
+|------------+------------------------|
+|   12, 16   | - 1; for input request |
+|   13, 17   | X - coordinate         |
+|   14, 18   | Y - coordinate         |
+|   15, 19   | 0 (unused)             |
+---------------------------------------</code></pre>
+<p>Coordinate data is read when PAD(12) or PAD(16) is examined.
+Coordinate data should be obtained after examining these. The STRIG
+function is used with the joystick to input the status of the trigger
+button.</p>
+<p>
+ 
+</p>
+<h2 id="internal-structure-of-basic">3. INTERNAL STRUCTURE OF BASIC</h2>
+<p>Knowledge of how the BASIC interpreter controls and executes programs
+is necessary for more advanced use of BASIC. The internal structure of
+BASIC is discussed next.</p>
+<p>
+ 
+</p>
+<h3 id="users-area">3.1 User’s Area</h3>
+<p>The lowest address of the user’s area was different in the MSX1
+machine whose amount of RAM was 8K, 16K, 32K, or 64K; in MSX2, it is
+always 8000H, because MSX2 machines have at least 64K of RAM. It can be
+obtained from the content of BOTTOM (FC48H).</p>
+<p>The highest address of the user’s area when no disk drives are
+connected is F380H; when disk drives are connected (using DISK-BASIC),
+it depends on the number of disk drives or on the disk capacity. It can
+be obtained from the content of HIMEM (FC4AH) after reset and before
+executing CLEAR statement.</p>
+<p><a href="#figure-2.6-state-of-memory-for-basic-mode">Figure 2.6</a>
+shows the state of memory when MSX is invoked.</p>
+<h5 id="figure-2.6-state-of-memory-for-basic-mode"><em>Figure 2.6 State
+of memory for BASIC mode</em></h5>
+<pre><code>0000 --------------------
+     |                  |
+     |      BASIC       |
+     |   Interpreter    |
+     |                  |
+8000 |------------------|  ⟵ (BOTTOM)             --+
+     |                  |                            |
+     |    User area     |                   --+      |
+     |                  |                     |      |
+     |------------------|  ⟵ (HIMEM)         |      |32K
+     |  Disk work area  |             --+     |16K   |
+F380 |------------------|               | 8K  |      |
+     | System work area |               |     |      |
+FFFF --------------------             --+   --+    --+</code></pre>
+<p><strong>Note:</strong> Though the machine has more than 32K bytes of
+RAM, only 32K bytes are used for BASIC. On MSX2, however, another 32K
+bytes can be used as a RAM disk by BASIC.</p>
+<p>When developping a program on MSX2, we recommend you create it at
+addresses 8000H to DE3FH as if to install a 2DD-2 drive whose highest
+address of the user’s area is the lowest. The work area of the disk can
+grow even larger, therefore, HIMEM of the application program should be
+checked to prevent disasters even in the worst situation. The following
+are ways to prevent this:</p>
+<ol type="1">
+<li>Make the work area relocatable</li>
+<li>Get the work area from BOTTOM</li>
+<li>Stop after instructing to reduce the number of drives</li>
+</ol>
+<p>On MSX, even when disks are mounted, they can be cut off by resetting
+while pressing the SHIFT key. When only one drive is mounted, the normal
+invocation causes the work area for two drives to be allocated (mainly
+for 2 drive simulator): in such a case, invoking the works area for only
+one drive is possible by resetting while pressing the CTRL key. If these
+steps are taken, more user’s area can be allocated.</p>
+<p>
+ 
+</p>
+<h3 id="detailed-view-of-the-users-area">3.2 Detailed View of the User’s
+Area</h3>
+<p><a href="#figure-2.7-state-of-the-users-area">Figure 2.7</a> shows
+how the user’s area will be used in BASIC, and <a
+href="#table-2.18-work-areas-with-start-and-end-addresses-of-each-area">Table
+2.18</a> shows the work area with information about where these areas
+start. This work area is read-only (the initialising routine sets it
+when reset), so actions when it is changed are not guaranteed.</p>
+<h5 id="figure-2.7-state-of-the-users-area"><em>Figure 2.7 State of the
+user’s area</em></h5>
+<pre><code>BOTTOM --&gt;  ---------------------- The lowest of the user&#39;s area
+            |                    | (8000H on MSX2)
+TXTTAB --&gt;  |--------------------|
+            |                 |  |
+            |      BASIC      V  |
+            |   program area     |
+            |                    |
+VARTAB --&gt;  |--------------------| Depends on the amount of text
+            | Simple variable |  |
+            |      area       V  |
+ARYTAB --&gt;  |--------------------|
+            | Array variable  |  |
+            |      area       V  |
+STREND --&gt;  |--------------------| Depends on the number of variables
+            |                 |  |
+            |                 V  |
+            |     Free area      |
+            |                 ^  |
+            |                 |  |
+SP     --&gt;  |--------------------| Area pointed by SP register
+            | Stack           ^  |
+            | area            |  |
+STKTOP --&gt;  |--------------------| --+
+            | String          ^  |   | Set by 1st parameter of CLEAR
+            | area            |  |   |
+MEMSIZ --&gt;  |--------------------| --+
+            | File            ^  |
+            | control block   |  |
+HIMEM  --&gt;  |--------------------| Set by 2nd parameter of CLEAR
+            |                    |
+            | Assembly language  |
+            | area               |
+            |                    |
+            ---------------------- The highest of the user&#39;s area
+                                   (depends on the presence of disks)</code></pre>
+<h5
+id="table-2.18-work-areas-with-start-and-end-addresses-of-each-area"><em>Table
+2.18 Work areas with start and end addresses of each area</em></h5>
+<pre><code>Area name                  Start address           End address
+----------------------------------------------------------------------------
+User&#39;s area            | [BOTTOM (FC48H)] | ([HIMEM (FC4AH)] when reset) - 1
+Program area           | [TXTTAB (F676H)] | [VARTAB (F6C2H)] - 1
+Simple variable area   | [VARTAB (F6C2H)] | [ARYTAB (F6C4H)] - 1
+Array variable area    | [ARYTAB (F6C4H)] | [STREND (F6C6H)] - 1
+Free area              | [STREND (F6C6H)] | [SP register] - 1
+Stack area             | [SP register]    | [STKTOP (F674H)] - 1
+String area            | [STKTOP (F674H)] | [MEMSIZ (F672H)] - 1
+(start of unused area) | [FRETOP (F69BH)] |
+File control block     | [MEMSIZ (F672H)] | [HIMEM  (FC4AH)] - 1
+Assembly language area | [HIMEM  (FC4AH)] | to the end of the user&#39;s area
+----------------------------------------------------------------------------</code></pre>
+<p>Roles of each user’s area are described below.</p>
+<ul>
+<li>BASIC program area</li>
+</ul>
+<p>A program written in BASIC is stored from the lowest address (8000H
+on MSX2) of the user’s area and its size depends on the amount of the
+program.</p>
+<ul>
+<li>Variable area</li>
+</ul>
+<p>The variable area is located just after the BASIC program area. It is
+secured to store the name and the value of the variables used when
+executing the program. The variables storage formats are shown in <a
+href="#figure-2.8-storage-format-of-simple-variables">Figure 2.8</a>
+(simple variables) and <a
+href="#figure-2.9-storage-format-of-array-variables">Figure 2.9</a>
+(array variables). Using array variables without declaring in the DIM
+statement causes the area to be allocated as an array with ten indexes.
+However, arrays which are more than four dimensional must be
+declared.</p>
+<h5 id="figure-2.8-storage-format-of-simple-variables"><em>Figure 2.8
+Storage format of simple variables</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.8.png"
+alt="Figure 2.8" />
+<figcaption aria-hidden="true">Figure 2.8</figcaption>
+</figure>
+<h5 id="figure-2.9-storage-format-of-array-variables"><em>Figure 2.9
+Storage format of array variables</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.9.png"
+alt="Figure 2.9" />
+<figcaption aria-hidden="true">Figure 2.9</figcaption>
+</figure>
+<p><strong>Note:</strong> variable data format is the same as the
+storage format of simple variables. The lower of the 2-byte value is
+stored first, and the higher byte last.</p>
+<ul>
+<li>Free area</li>
+</ul>
+<p>If the program area or the variable area grows too large or a lot of
+data is stacked and the free area runs out, an “OUT OF MEMORY” error
+occurs. The amount of free area can be checked by examining PRINT FRE(0)
+using the FRE function in BASIC.</p>
+<ul>
+<li>Stack area</li>
+</ul>
+<p>This is the stack area used by BASIC. It is used in order from
+high-order address when executing GOSUB or FOR.</p>
+<ul>
+<li>String area</li>
+</ul>
+<p>This area is used to reserve the contents of string variables and
+used from high-order address. The space in this area can be specified by
+the first parameter of the CLEAR statement in BASIC. The default is 200
+bytes. Exhausting the space in this area causes a “OUT OF STRING SPACE”
+error. The amount of unused area can be checked by examining PRINT
+FRE(““) using the FRE function in BASIC</p>
+<ul>
+<li>File control block</li>
+</ul>
+<p>File information is stored in this area with 10BH (267) bytes
+allocated for each file. The amount of space for files can be specified
+by the MAXFILES statement of BASIC. At reset, the area for one file
+(MAXFILES = 1) is allocated. Another space is always allocated for SAVE
+and LOAD instructions, so actually area for two files is allocated. <a
+href="#table-2.19-file-control-block-fcb-format">Table 2.19</a> shows
+the format of file control block.</p>
+<h5 id="table-2.19-file-control-block-fcb-format"><em>Table 2.19 File
+control block (FCB) format</em></h5>
+<pre><code>  Offset    Label                    Meaning
+--------------------------------------------------------------
+| + 0   |   FL.MOD   |   Mode of the file opened             |
+| + 1   |   FL.FCA   |   Pointer (low) to FCB for BDOS       |
+| + 2   |   FL.LCA   |   Pointer (high) to FCB for BDOS      |
+| + 3   |   FL.LSA   |   Backup character                    |
+| + 4   |   FL.DSK   |   Device number                       |
+| + 5   |   FL.SLB   |   Internal use for the interpreter    |
+| + 6   |   FL.BPS   |   FL.BUF location                     |
+| + 7   |   FL.FLG   |   Flag containing various information |
+| + 8   |   FL.OPS   |   Virtual head information            |
+| + 9...|   FL.BUF   |   File buffer (256 bytes)             |
+--------------------------------------------------------------</code></pre>
+<ul>
+<li>Assembly language area</li>
+</ul>
+<p>Use this area to write programs in assembly language or to operate
+from memory directly. To do these, this area should be reserved by CLEAR
+statement.</p>
+<ul>
+<li>Work area for disk</li>
+</ul>
+<p>Figure 2.10 shows the work area allocated when a disk is mounted.
+Note that this area does not exist when no disk is mounted. Labels to
+the right of this figure shows the address information which resides
+there.</p>
+<h5 id="figure-2.10-work-area-for-disk"><em>Figure 2.10 Work area for
+disk</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.10.png"
+alt="Figure 2.10" />
+<figcaption aria-hidden="true">Figure 2.10</figcaption>
+</figure>
+<p>
+ 
+</p>
+<h3 id="storage-format-of-basic-programs">3.3 Storage format of BASIC
+programs</h3>
+<p>Programs are stored in memory as shown in <a
+href="#figure-2.11-text-storage-format">Figure 2.11</a> and the meaning
+of its contents are described below.</p>
+<h5 id="figure-2.11-text-storage-format"><em>Figure 2.11 Text storage
+format</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.11.png"
+alt="Figure 2.11" />
+<figcaption aria-hidden="true">Figure 2.11</figcaption>
+</figure>
+<p><strong>Note:</strong> Link pointers and line numbers are stored with
+their low bytes first and high bytes last.</p>
+<ul>
+<li>Link pointer</li>
+</ul>
+<p>The text pointer to the next line is given in the form of an absolute
+address.</p>
+<ul>
+<li>Line number</li>
+</ul>
+<p>This stores the line number of the program, normally the values from
+0 to 65529 (from 0000H to FFF9H). It is possible to make line numbers of
+65530 or more, but LIST command does not list them.</p>
+<ul>
+<li>Text</li>
+</ul>
+<p>The program body is stored here in the intermediate code format.
+Reserved words (keywords), operators, numeric values are converted to
+the intermediate codes, and others (such as variable names or string
+constantes) are stored as character codes. <a
+href="#table-2.20-list-of-intermediate-codes">Table 2.20</a> lists the
+intermediate codes and <a
+href="#figure-2.12-numeral-formats-in-text">Figure 2.12</a> shows the
+numeric formats in text.</p>
+<p>See the appendix at the end of this book for character codes. Graphic
+characters are stored in 2 bytes (2 characters) of
+<code>"CHR$(1) + (graphic character code + 64)"</code>, so be careful
+when defining graphic characters.</p>
+<h5 id="table-2.20-list-of-intermediate-codes"><em>Table 2.20 List of
+intermediate codes</em></h5>
+<pre><code>-------------------   -------------------   -------------------
+| &gt;       |    EE |   | ERR     |    E2 |   | PAINT   |    BF |
+| =       |    EF |   | ERROR   |    A6 |   | PDL     | FF A4 |
+| &lt;       |    F0 |   | EXP     | FF 8B |   | PEEK    | FF 97 |
+| +       |    F1 |   | FIELD   |    B1 |   | PLAY    |    C1 |
+| -       |    F2 |   | FILES   |    B7 |   | POINT   |    ED |
+| *       |    F3 |   | FIX     | FF A1 |   | POKE    |    98 |
+| /       |    F4 |   | FN      |    DE |   | POS     | FF 91 |
+| ^       |    F5 |   | FOR     |    82 |   | PRESET  |    C3 |
+| \       |    FC |   | FPOS    | FF A7 |   | PRINT   |    91 |
+| ABS     | FF 86 |   | FRE     | FF 8F |   | PSET    |    C2 |
+| AND     |    F6 |   | GET     |    B2 |   | PUT     |    B3 |
+| ASC     | FF 95 |   | GOSUB   |    8D |   | READ    |    87 |
+| ATN     | FF 8E |   | GOTO    |    89 |   | REM     | 3A 8F |
+| ATTR$   |    E9 |   | HEX$    | FF 9B |   | RENUM   |    AA |
+| AUTO    |    A9 |   | IF      |    8B |   | RESTORE |    8C |
+| BASE    |    C9 |   | IMP     |    FA |   | RESUME  |    A7 |
+| BEEP    |    C0 |   | INKEY$  |    EC |   | RETURN  |    8E |
+| BIN$    | FF 9D |   | INP     | FF 90 |   | RIGHT$  | FF 82 |
+| BLOAD   |    CF |   | INPUT   |    85 |   | RND     | FF 88 |
+| BSAVE   |    D0 |   | INSTR   |    E5 |   | RSET    |    B9 |
+| CALL    |    CA |   | INT     | FF 85 |   | RUN     |    8A |
+| CDBL    | FF A0 |   | IPL     |    D5 |   | SAVE    |    BA |
+| CHR$    | FF 96 |   | KEY     |    CC |   | SCREEN  |    C5 |
+| CINT    | FF 9E |   | KILL    |    D4 |   | SET     |    D2 |
+| CIRCLE  |    BC |   | LEFT$   | FF 81 |   | SGN     | FF 84 |
+| CLEAR   |    92 |   | LEN     | FF 92 |   | SIN     | FF 89 |
+| CLOAD   |    9B |   | LET     |    88 |   | SOUND   |    C4 |
+| CLOSE   |    B4 |   | LFILES  |    BB |   | SPACE$  | FF 99 |
+| CLS     |    9F |   | LINE    |    AF |   | SPC(    |    DF |
+| CMD     |    D7 |   | LIST    |    93 |   | SPRITE  |    C7 |
+| COLOR   |    BD |   | LLIST   |    9E |   | SQR     | FF 87 |
+| CONT    |    99 |   | LOAD    |    B5 |   | STEP    |    DC |
+| COPY    |    D6 |   | LOC     | FF AC |   | STICK   | FF A2 |
+| COS     | FF 8C |   | LOCATE  |    D8 |   | STOP    |    90 |
+| CSAVE   |    9A |   | LOF     | FF AD |   | STR$    | FF 93 |
+| CSNG    | FF 9F |   | LOG     | FF 8A |   | STRIG   | FF A3 |
+| CSRLIN  |    E8 |   | LPOS    | FF 9C |   | STRING$ |    E3 |
+| CVD     | FF AA |   | LPRINT  |    9D |   | SWAP    |    A4 |
+| CVI     | FF A8 |   | LSET    |    B8 |   | TAB(    |    DB |
+| CVS     | FF A9 |   | MAX     |    CD |   | TAN     | FF 8D |
+| DATA    |    84 |   | MERGE   |    B6 |   | THEN    |    DA |
+| DEF     |    97 |   | MID$    | FF 83 |   | TIME    |    CB |
+| DEFDBL  |    AE |   | MKD$    | FF B0 |   | TO      |    D9 |
+| DEFINT  |    AC |   | MKI$    | FF AE |   | TROFF   |    A3 |
+| DEFSNG  |    AD |   | MKS$    | FF AF |   | TRON    |    A2 |
+| DEFSTR  |    AB |   | MOD     |    FB |   | USING   |    E4 |
+| DELETE  |    A8 |   | MOTOR   |    CE |   | USR     |    DD |
+| DIM     |    86 |   | NAME    |    D3 |   | VAL     | FF 94 |
+| DRAW    |    BE |   | NEW     |    94 |   | VARPTR  |    E7 |
+| DSKF    | FF A6 |   | NEXT    |    83 |   | VDP     |    C8 |
+| DSKI$   |    EA |   | NOT     |    E0 |   | VPEEK   | FF 98 |
+| DSKO$   |    D1 |   | OCT$    | FF 9A |   | VPOKE   |    C6 |
+| ELSE    | 3A A1 |   | OFF     |    EB |   | WAIT    |    96 |
+| END     |    81 |   | ON      |    95 |   | WIDTH   |    A0 |
+| EOF     | FF AB |   | OPEN    |    B0 |   | XOR     |    F8 |
+| EQV     |    F9 |   | OR      |    F7 |   -------------------
+| ERASE   |    A5 |   | OUT     |    9C |
+| ERL     |    E1 |   | PAD     | FF A5 |
+-------------------   -------------------</code></pre>
+<h5 id="figure-2.12-numeral-formats-in-text"><em>Figure 2.12 Numeral
+formats in text</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.12.png"
+alt="Figure 2.12" />
+<figcaption aria-hidden="true">Figure 2.12</figcaption>
+</figure>
+<p>Numbers called “identification codes” are assigned numeric values to
+distinguish them from reserved words and variable names, and by
+referring to them the following values can be recognised.</p>
+<p>The high and low bytes of a 2-byte numeric value are stored in
+reverse. Signed numeric values have only the intermediate codes + or -
+preceding the identifying codes, numeral values themselves are always
+stored as positive values. Floating-point notations are almost the same
+as the descriptions of <a href="Appendix2.html">Math-Pack</a>
+(Mathematical Package) in the APPENDIX, note that numerical values are
+always stored as positive. Binary numbers (&amp;B) do not have
+identifying codes and are stored as ASCII codes.</p>
+<p>
+ 
+</p>
+<h2 id="linking-with-assembly-language-programs">4. LINKING WITH
+ASSEMBLY LANGUAGE PROGRAMS</h2>
+<p>As described so far, MSX BASIC version 2.0 has powerful features,
+but, if you wish to save execution time even more or to make full use of
+MSX2 hardware, you should use assembly language. The following sections
+show how to call assembly language programs from BASIC and gives the
+information you will need.</p>
+<p>
+ 
+</p>
+<h3 id="usr-function">4.1 USR Function</h3>
+<p>To call the assembly language routine from BASIC, follow the steps
+described below. The value in parenthesis of the USR function is passed
+to the assembly language routine as an argument. The argument may be
+either an expression or a string expression.</p>
+<ol type="1">
+<li>Specify the starting address of the assembly language program for
+the execution, using DEF USR statement.</li>
+<li>Call the assembly language program by USR function.</li>
+<li>Execute RET (C9H) when returning from the assembly language routine
+to BASIC.</li>
+</ol>
+<p>e.g.) To call the assembly language program whose starting address is
+C000H:</p>
+<pre><code>    DEFUSR=&amp;HC000
+    A=USR(0)</code></pre>
+<p>
+ 
+</p>
+<h3
+id="data-exchange-by-the-argument-and-return-value-of-usr-function">4.2
+Data Exchange by the Argument and Return Value of USR Function</h3>
+<p>When the argument is passed from BASIC to the assembly language
+program, its type can be checked by examining the contents of register A
+in the assembly language program (see <a
+href="#table-2.21-argument-types-assigned-to-register-a">Table
+2.21</a>). Since the object value is stored in the form as shown in <a
+href="#figure-2.13-how-values-are-passed-as-arguments">Figure 2.13</a>
+according to the argument type, you can get the value according to the
+format. As an example, <a
+href="#list-2.1-example-of-the-argument-of-string-type">List 2.1</a>
+shows a program which receives an argument of the string type.</p>
+<h5 id="table-2.21-argument-types-assigned-to-register-a"><em>Table 2.21
+Argument types assigned to register A</em></h5>
+<pre><code>--------------------------------------
+|  2  |  2-byte integer type         |
+|  3  |  String type                 |
+|  4  |  Single precision real type  |
+|  8  |  Double precision real type  |
+--------------------------------------</code></pre>
+<h5 id="figure-2.13-how-values-are-passed-as-arguments"><em>Figure 2.13
+How values are passed as arguments</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.13.png"
+alt="Figure 2.13" />
+<figcaption aria-hidden="true">Figure 2.13</figcaption>
+</figure>
+<h5 id="list-2.1-example-of-the-argument-of-string-type"><em>List 2.1
+Example of the argument of string type</em></h5>
+<pre><code>;************************************************************
+;  List 2.1    print string with USR function
+;              to use, do  DEF USR=&amp;HB000 : A$=USR(&quot;STRING&quot;)
+;************************************************************
+;
+CHPUT   EQU     00A2H           ;character output
+
+        ORG     0B000H
+
+RDARG:  CP      3
+        RET     NZ              ;parameter is not string
+
+        PUSH    DE
+        POP     IX              ;IX := string descriptor
+        LD      A,(IX+0)        ;get string length
+        LD      L,(IX+1)        ;get string pointer (low)
+        LD      H,(IX+2)        ;get string pointer (high)
+        OR      A
+        RET     Z               ;if length = 0
+
+RD1:    PUSH    AF
+        LD      A,(HL)          ;get a characetr
+        CALL    CHPUT           ;put a character
+        POP     AF
+        DEC     A
+        RET     Z
+        INC     HL
+        JR      RD1
+
+        END</code></pre>
+<p>On the other hand, these values passed as arguments can be passed to
+BASIC as USR function values by changing them in the assembly language
+program. In this case the type of return value can alse be changed to
+types other that of the argument from BASIC by changing VALTYP (F663H).
+Note that the amount of characters for a string cannot be changed.</p>
+<p>
+ 
+</p>
+<h3 id="making-new-commands">4.3 Making New Commands</h3>
+<p>In MSX the reserved words “CMD” and “IPL” are currently unused and by
+changing the pointers to these words (FE0DH and FE03H) to jump to your
+own assembly language routine, new commands can be built. <a
+href="#list-2.2-making-cmd-command">List 2.2</a> shows a simple
+example.</p>
+<h5 id="list-2.2-making-cmd-command"><em>List 2.2 Making CMD
+command</em></h5>
+<pre><code>;*****************************************************************
+;  List 2.2   make CMD command ( turn on/off the CAPS LOCK )
+; to initialize command:                DEF USR=&amp;HB000 : A=USR(0)
+; to use command:                       CMD
+;*****************************************************************
+;
+CHGCAP  EQU     0132H           ;CAPS LAMP on/off
+CAPST   EQU     0FCABH          ;CAPS LOCK status
+HCMD    EQU     0FE9DH          ;CMD HOOK
+
+        ORG     0B000H
+
+;----- CMD initialize -----   Note:  Executing this section adds the CMD command
+
+        LD      BC,5            ;NEW HOOK SET
+        LD      DE,HCMD
+        LD      HL,HDAT
+        LDIR
+        RET
+
+;----- new HOOK data -----    Note:  5-byte data to be written into hook (FE0DH)
+
+HDAT:   POP     AF
+        JP      CAPKEY
+        NOP
+
+;----- executed by CMD -----  Note:  Actual CMD command
+
+CAPKEY: CALL    CHGCAP
+        LD      A,(CAPST)
+        CPL
+        LD      (CAPST),A
+        RET
+
+        END</code></pre>
+<p>The first “POP AF” written to the pointer in this case, discards the
+error handling addresses stacked at “CMD” execution. Without this, the
+“RET” command would jump to the error handling routine isntead of
+returning to BASIC. It is a way to use this address for printing errors
+inside of user routine.</p>
+<p>These pointers are reserved for future expansion, so should not be
+used with application programs on the market.</p>
+<p>
+ 
+</p>
+<h3 id="expansion-of-cmd-command">4.4 Expansion of CMD command</h3>
+<p>For more sophisticated expansions of statements it is useful if
+arguments can be passed to the CMD command. As the HL register points to
+the next location after “CMD” in the BASIC text when the assembly
+language routine is called, it can be done by appreciating the
+successive string. The following is a list of internal routines, useful
+for these.</p>
+<p>
+ 
+</p>
+<h4 id="chrgtr-4666hmain">CHRGTR (4666H/MAIN)</h4>
+<p>Extract one character from text (see <a
+href="#figure-2.14-inputoutput-state-of-chrgtr">Figure 2.14</a>)</p>
+<ul>
+<li><strong>Input</strong>: HL ⟵ Address pointing to text</li>
+<li><strong>Output</strong>:
+<ul>
+<li>HL ⟵ Address of the extracted character</li>
+<li>A ⟵ Extracted character</li>
+<li>Z flag ⟵ ON at the end of line (: or 00H)</li>
+<li>CY flag ⟵ ON if 0 to 9</li>
+</ul></li>
+</ul>
+<p>Purpose: Extract one character from the text at (HL + 1). Spaces are
+skipped.</p>
+<h5 id="figure-2.14-inputoutput-state-of-chrgtr"><em>Figure 2.14
+Input/output state of CHRGTR</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.14.png"
+alt="Figure 2.14" />
+<figcaption aria-hidden="true">Figure 2.14</figcaption>
+</figure>
+<p>
+ 
+</p>
+<h4 id="frmevl-4c64main">FRMEVL (4C64/MAIN)</h4>
+<p>Evaluate an expression in text (see <a
+href="#figure-2.15-inputoutput-state-of-frmevl">Figure 2.15</a>)</p>
+<ul>
+<li><strong>Input</strong>: HL ⟵ Starting address of the expression in
+text</li>
+<li><strong>Output</strong>:
+<ul>
+<li>HL ⟵ Address after the expression</li>
+<li>[VALTYP (F663H)] ⟵ Value 2, 3, 4 or 8 according to the
+expression</li>
+<li>[DAC (F7F6H)] ⟵ Result of the evaluation of the expression</li>
+</ul></li>
+</ul>
+<p>Purpose: Evaluate an expression and make output according to its
+type.</p>
+<h5 id="figure-2.15-inputoutput-state-of-frmevl"><em>Figure 2.15
+Input/output state of FRMEVL</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.15.png"
+alt="Figure 2.15" />
+<figcaption aria-hidden="true">Figure 2.15</figcaption>
+</figure>
+<p>
+ 
+</p>
+<h4 id="frmqnt-542fmain">FRMQNT (542F/MAIN)</h4>
+<p>Evaluate an expression in 2-byte integer type.</p>
+<ul>
+<li><strong>Input</strong>: HL ⟵ Starting address of the expression in
+text</li>
+<li><strong>Output</strong>:
+<ul>
+<li>HL ⟵ Address after the expression</li>
+<li>DE ⟵ Result of evaluation of the expression</li>
+</ul></li>
+</ul>
+<p>Purpose: Evaluate an expression and make output in integer type
+(INT). When the result is beyond the range of 2-byte integer type, an
+“Overflow” error occurs and the system returns to the BASIC command
+level.</p>
+<p>
+ 
+<p/>
+<h4 id="getbyt-521cmain">GETBYT (521C/MAIN)</h4>
+<p>Evaluate an expression in 1-byte integer type.</p>
+<ul>
+<li><strong>Input</strong>: HL ⟵ Starting address of the expression in
+text</li>
+<li><strong>Output</strong>:
+<ul>
+<li>HL ⟵ Next address of expression</li>
+<li>A, E ⟵ Result of expression evaluation (A and E contains the same
+value.)</li>
+</ul></li>
+</ul>
+<p>Purpose: Evaluate an expression and make 1-byte integer output. When
+the result is beyond the range of 1-byte integer type, an “Illegal
+function call” error occurs and the execution returns to BASIC command
+level.</p>
+<p>
+ 
+<p/>
+<h4 id="frestr-67d0main">FRESTR (67D0/MAIN)</h4>
+<p>Register a string.</p>
+<ul>
+<li><strong>Input</strong>:
+<ul>
+<li>[VALTYP (F663H)] ⟵ Type (if not string type, an error occurs)</li>
+<li>[DAC (F7F6H)] ⟵ Pointer to string descriptor</li>
+</ul></li>
+<li><strong>Output</strong>: HL ⟵ Pointer to string descriptor</li>
+</ul>
+<p>Purpose: Register the result of the string type obtained by FRMEVL
+and obtain its string descriptor. When evaluating a string, this is
+generally combined with FRMEVL described above to use as follows:</p>
+<pre><code> .
+ .
+ .
+CALL    FRMEVL
+PUSH    HL
+CALL    FRESTR
+EX      DE,HL
+POP     HL
+LD      A,(DE)
+ .
+ .
+ .</code></pre>
+<p>
+ 
+</p>
+<h4 id="ptrget-5ea4main">PTRGET (5EA4/MAIN)</h4>
+<p>Obtain the address for the storage of a variable (see <a
+href="#figure-2.16-inputoutput-state-of-ptrget">Figure 2.16</a>).</p>
+<ul>
+<li><strong>Input</strong>:
+<ul>
+<li>HL ⟵ Starting address of the variable name in text</li>
+<li>[SUBFLG (F6A5H)] ⟵ 0: Simple variable, other than 0: array
+variable</li>
+</ul></li>
+<li><strong>Output</strong>:
+<ul>
+<li>HL ⟵ Address after the variable name</li>
+<li>DE ⟵ Address where the contents of the objective variable is
+stored</li>
+</ul></li>
+</ul>
+<p>Purpose: Obtain the address for the storage of a variable (or an
+array variable). Allocation of the area is also done when the area for
+the objective variable has not been allocated. When the value of SUBFLG
+is set to other than 0, the starting address of the array is obtained,
+other than individual elements of the array.</p>
+<h5 id="figure-2.16-inputoutput-state-of-ptrget"><em>Figure 2.16
+Input/output state of PTRGET</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.16.png"
+alt="Figure 2.16" />
+<figcaption aria-hidden="true">Figure 2.16</figcaption>
+</figure>
+<p>
+ 
+</p>
+<h4 id="newstt-4601hmain">NEWSTT (4601H/MAIN</h4>
+<p>Execute a text</p>
+<ul>
+<li><strong>Input</strong>: HL ⟵ Address of the text to be executed</li>
+<li><strong>Output</strong>: —-</li>
+</ul>
+<p>Purpose: Execute a text. The state of the text is necessary to be as
+same as shown in <a href="#figure-2.17-memory-setting-for-newstt">Figure
+2.17</a>.</p>
+<h5 id="figure-2.17-memory-setting-for-newstt"><em>Figure 2.17 Memory
+setting for NEWSTT</em></h5>
+<figure>
+<img
+src="../pics/Figure%202.17.png"
+alt="Figure 2.17" />
+<figcaption aria-hidden="true">Figure 2.17</figcaption>
+</figure>
+<p>Since these internal routines are for BASIC texts, the same error
+handling as BASIC is done when an error occurs. In this case, by
+changing H.ERROR (FFB1H), the user can handle the error (the E register
+contains the error number) (see <a
+href="#list-2.3-changing-error-handling-routine">List 2.3</a>).</p>
+<h5 id="list-2.3-changing-error-handling-routine"><em>List 2.3 Changing
+error handling routine</em></h5>
+<pre><code>;****************************************************************
+;  List 2.3   Your own error
+;             To use,   do DEF USR=&amp;HB000 : A=USR(0)
+;****************************************************************
+;
+HERR    EQU     0FFB1H          ;error hook
+SYNERR  EQU     2               ;syntax error code
+CHPUT   EQU     0A2H            ;character output
+NEWSTT  EQU     4601H           ;run
+READYR  EQU     409BH
+
+        ORG     0B000H
+                                Note:
+;----- command initialize ----- When this portion is executed, the error handling routine is changed.
+
+        LD      BC,5            ;SET NEW HOOK
+        LD      DE,HERR
+        LD      HL,HDAT
+        LDIR
+        RET
+
+HDAT:   JP      ERROR
+        NOP
+        NOP
+                                Note:
+;----- error routine -----      Error handling body
+
+ERROR:  LD      A,E             ;when in error, E holds error code
+        CP      SYNERR          ;syntax error ?
+        RET     NZ              ;no
+
+        LD      HL,DATA1        ;yes
+LOOP:   LD      A,(HL)          ;put new error message
+        CP      &quot;$&quot;
+        JR      Z,EXIT
+        PUSH    HL
+        CALL    CHPUT
+        POP     HL
+        INC     HL
+        JR      LOOP
+
+EXIT:   JP      READYR          ;BASIC hot start
+
+DATA1:  DEFM    OOHPS!!         ;new error message
+        DB      07H,07H,07H,&quot;$&quot;
+
+        END</code></pre>
+<p>
+ 
+</p>
+<h3 id="interrupt-usage">4.5 Interrupt usage</h3>
+<p>The Z80 CPU has INT and NMI interrupt terminals. The MSX, however,
+uses only INT. The INT terminal gets 60 Hz signals, so timer interrupts
+are executed 60 times per 1 second. As the interrupt mode of Z80 is set
+to 1, 38H is called when an interrupt occurs and then the system control
+jumps to the timer interrupt routine, where various operations such as
+key input are done.</p>
+<p>The timer interrupt routine jumps to hook H.TIMI (FD9FH) in mid
+course. Using this hook enables the user to add a function to this timer
+interrupt routine. Thogh there is ordinarily only a RET command, be
+careful when peripherals such as disks are connected and this hook is
+already in use. In this case, careless modifications causes peripherals
+to be disabled, so prearrangement is necessary to make machines to
+execute that normally. List 2.4 is an example of this handling and the
+interrupt usage.</p>
+<h5 id="list-2.4-correct-usage-of-timer-interrupt-hook"><em>List 2.4
+Correct usage of timer interrupt hook</em></h5>
+<pre><code>;*************************************************************
+;   List 2.4   How to use HOOK safety
+;              This routine uses TIMER INTERRUPT HOOK
+;                                  and turn on/off CAPS LOCK
+;              To start, do  DEF USR=&amp;HB000 : A=USR(0)
+;              To end,   do  DEF USR=&amp;HB030 : A=USR(0)
+;*************************************************************
+;
+CHGCAP  EQU     0132H           ;CAPS LAMP on/off
+CAPST   EQU     0FCABH          ;CAPS LOCK status
+TIMI    EQU     0FD9FH          ;timer interrupt hook
+JPCODE  EQU     0C3H
+TIMER   EQU     020H
+
+        ORG     0B000H
+
+;----- interrupt on ----- Note:  restore the former hook when changing the hook
+
+INTON:  DI
+        LD      HL,TIMI         ;OLD HOOK SAVE
+        LD      DE,HKSAVE
+        LD      BC,5
+        LDIR
+
+        LD      A,JPCODE        ;NEW HOOK SET
+        LD      (TIMI),A
+        LD      HL,INT
+        LD      (TIMI+1),HL
+        EI
+        RET
+
+        ORG     0B030H
+
+;----- interrupt off ----- Note:  restore the reserved hook and exit
+
+INTOFF: DI
+        LD      HL,HKSAVE
+        LD      DE,TIMI
+        LD      BC,5
+        LDIR
+        EI
+        RET
+
+;----- interrupt routine -----
+
+INT:    PUSH    AF
+        LD      A,(CAPST)
+        OR      A
+        JR      Z,CAPON
+
+CAPOFF: LD      A,(COUNT1)
+        DEC     A
+        LD      (COUNT1),A
+        JR      NZ,FIN
+        LD      A,TIMER
+        LD      (COUNT1),A
+        XOR     A
+        LD      (CAPST),A
+        LD      A,0FFH
+        CALL    CHGCAP
+        JR      FIN
+
+CAPON:  LD      A,(COUNT2)
+        DEC     A
+        LD      (COUNT2),A
+        JR      NZ,FIN
+        LD      A,TIMER
+        LD      (COUNT2),A
+        LD      A,0FFH
+        LD      (CAPST),A
+        XOR     A
+        CALL    CHGCAP
+
+FIN:    POP     AF
+        CALL    HKSAVE          ;old HOOK call
+
+        RET
+
+COUNT1: DEFB    TIMER
+COUNT2: DEFB    TIMER
+
+HKSAVE: NOP                     ;old HOOK save area
+        NOP
+        NOP
+        NOP
+        RET
+
+        END</code></pre>
+<p>
+ 
+</p>
+<h2 id="notes-on-software-development">5. NOTES ON SOFTWARE
+DEVELOPMENT</h2>
+<p>There are some matters, when developing the software for MSX, that
+should be followed so as to make the software work without any problems
+on any MSX machines. The following describes these matters and
+introduces information that will help you develop software.</p>
+<h3 id="bios">BIOS</h3>
+<p>The purpose of BIOS is to separate the hardware and the software and
+to make the software still valid if the hardware changes. Applications
+for sale which manage input and output should use BIOS (except for
+VDP).</p>
+<p>BIOS is called through the jump table which begins at 0000H of
+MAIN-ROM. Though MSX2 has a jump table on SUB-ROM, it is used for
+calling the extended functions. The branch destination of the jump table
+or, the contents of BIOS may be modified for the hardware modification
+or the extension of the function, so applications should not call them
+directly. Thogh this book has some examples that call addresses other
+than the BIOS jump table, you should consider them for information only
+(see <a href="Appendix1.html">BIOS list</a> in APPENDIX). Applications
+can call Math-Pack and internal routines for the extended statements
+described above. These will not be changed in the future.</p>
+<h3 id="work-area">Work area</h3>
+<p>F380H to FFFFH of MAIN-RAM cannot be used, as it is a work area for
+BIOS and BASIC interpreter. Free space in the work area cannot be used,
+because it is reserved for the future use. See <a
+href="#users-area">3.1 User’s area</a> for the work area of the
+disk.</p>
+<h3 id="initialisation-of-ram-and-stack-pointer">Initialisation of RAM
+and stack pointer</h3>
+<p>The contents of RAM are unpredictable when the machine is powered and
+areas other than system work are are not initialised. Applications
+should initialise the work area. There was once an application which
+expected the contents of RAM to be 00H and was unusable.</p>
+<p>The value of the stack pointer when the INIT routine (see <a
+href="Chapter5b.html">Section 7 of Chapter 5</a>) in the ROM cartridge
+is called is unpredictable and the value when disk interface has been
+initialised is smaller than when not. For these reasons some programs
+which did not initialise the stack pointer had unpredictable results.
+Programs which are invoked by the INIT routine and continue processing
+(that is, programs which do not need to use peripherals such as disks or
+BASIC interpreter) should initialise the stack pointer.</p>
+<h3 id="work-area-of-extended-bios">Work area of extended BIOS</h3>
+<p>When using extended BIOS calls, a stack should be placed above C000H
+so that CPU can refer to the work area even if the slot is switched
+over. For the same reason, FCB of RS-232C should be above 8000H.</p>
+<h3 id="work-area-of-device-drivers-etc.">Work area of device drivers,
+etc.</h3>
+<p>Special attention should be paid for the allocation of the work area
+of programs which reside in memory with another program at the same
+time, programs such as the device driver or a subroutine called from
+BASIC.</p>
+<p>The INIT routine of the cartridge changes BOTTOM (FC48H), reserves
+the area between the old BOTTOM and new BOTTOM as its work area, and
+records the address of the work area to 2-byte area SLTWRK (FD09H)
+allocated for each slot. For more details, see <a
+href="Chapter5b.html">Section 7 of Chapter 5</a>.</p>
+<h3 id="hook">Hook</h3>
+<p>When using the RS-232C cartridge, change the hook for an interrupt.
+For example, if another cartridge uses an interrupt hook, the RS-232C
+cartridge cannot use the same hook. To prevent this, the previous
+contents of the hook (inter-slot call command for the interrupt handling
+routine of RS-232C cartridge, in the example above) should be copied to
+another location, and, when called by the hook, it should be called so
+that all cartridges intending to use the hook can receive control (see
+<a href="#figure-2.18-initialisation-of-the-hook">Figure 2.18</a>). For
+more details, see <a href="Chapter5b.html">Section 7 of Chapter
+5</a>.</p>
+<h4 id="figure-2.18-initialisation-of-the-hook"><em>Figure 2.18
+Initialisation of the hook</em></h4>
+<figure>
+<img
+src="../pics/Figure%202.18.png"
+alt="Figure 2.18" />
+<figcaption aria-hidden="true">Figure 2.18</figcaption>
+</figure>
+<h3 id="vram-capacity">VRAM capacity</h3>
+<p>The capacity of VRAM can be found by evaluating bits 1 and 2 of MODE
+(FAFCH) (see <a
+href="#table-2.22-getting-the-information-about-the-vram-capacity">Table
+2.22</a>).</p>
+<h4
+id="table-2.22-getting-the-information-about-the-vram-capacity"><em>Table
+2.22 Getting the information about the VRAM capacity</em></h4>
+<pre><code>----------------------------------
+|    [FAFCH]    |                |
+|---------------|  VRAM Capacity |
+| Bit 2 | Bit 1 |                |
+|-------+-------+----------------|
+|   0   |   0   |   16K (MSX1)   |
+|   0   |   1   |   64K (MSX2)   |
+|   1   |   0   |  128K (MSX2)   |
+----------------------------------</code></pre>
+<h3 id="basic-version-number">BASIC version number</h3>
+<p>The following methods can be used for applications to find out the
+version number of BASIC.</p>
+<ol type="1">
+<li>Read the contents of 2DH of MAIN-ROM (00H = version 1.0, 01H =
+version 2.0, and so on).</li>
+<li>In version 2.0 or later versions, EXBRSA (FAF8H) contains the slot
+address of SUB-ROM. When it has none (00H), the version is version
+1.0.</li>
+</ol>
+<h3 id="international-msx">International MSX</h3>
+<p>There are different kinds of MSX for various countries. The following
+items are different by country:</p>
+<ul>
+<li>Keyboard arrangement, character set, PRINT USING format</li>
+<li>Timer interrupt frequency</li>
+</ul>
+<p>The version of machine can be found by reading the ID byte
+information in ROM (see <a
+href="#figure-2.19-contents-of-id-byte">Figure 2.19</a>) and the
+correspondence for MSX of each country will be accomplished (see <a
+href="#table-2.23-msx-format-for-each-country">Table 2.23</a>).</p>
+<h4 id="figure-2.19-contents-of-id-byte"><em>Figure 2.19 Contents of ID
+byte</em></h4>
+<pre><code>-------
+| 2BH |   b0  --+
+-------         |  character generator
+          b1    |
+                |  0: Japan     1: United States, etc.
+          b2    |  2: USSR
+                |
+          b3  --+
+
+          b4  --+
+                |  date format
+          b5    |
+                |  0:Y/M/D      1:M/D/Y       2:D/M/Y
+          b6  --+
+
+          b7       interrupt period (VSYNC)
+                   0:60Hz       1:50Hz
+
+
+-------
+| 2CH |   b0  --+
+-------         |  keyboard
+          b1    |
+                |  0:Japan      1:United States, etc.
+          b2    |  2:France     3:United Kingdom
+                |  4:Germany    5:USSR          6:Spain
+          b3  --+
+
+          b4  --+
+                |
+          b5    |  information about PRINT USING
+                |  or others
+          b6    |
+                |
+          b7  --+</code></pre>
+<h4 id="table-2.23-msx-format-for-each-country"><em>Table 2.23 MSX
+format for each country</em></h4>
+<pre><code>-----------------------------------------------------------------------------
+|           |              |          |             PRINT USING             |
+|           |              |   Date   |-------------------------------------|
+|  Country  |    TV set    |          | Initial  | String | Re-   | Curren- |
+|           |              |  format  | screen   | length | place | cy      |
+|           |              |          | mode     | specif.| char. | symbol  |
+|-----------+--------------+----------+----------+--------+-------+---------|
+| Japan     | NTSC  (60Hz) | YY/MM/DD | Screen 1 |   &amp;    |  @    |  (yen)  |
+| UK        | PAL   (50Hz) | DD/MM/YY | Screen 0 |   \    |  &amp;    | (pound) |
+| Internat. | PAL   (50Hz) | MM/DD/YY | Screen 0 |   \    |  &amp;    |$(dollar)|
+| US        | NTSC  (60Hz) | MM/DD/YY | Screen 0 |   \    |  &amp;    |$(dollar)|
+| France    | SECAM (50Hz) | DD/MM/YY | Screen 0 |   \    |  &amp;    |$(dollar)|
+| Germany   | PAL   (50Hz) | DD/MM/YY | Screen 0 |   \    |  &amp;    |$(dollar)|
+| USSR      | NTSC  (60Hz) | MM/DD/YY | Screen 0 |   \    |  &amp;    |$(dollar)|
+| Spain     | PAL   (50Hz) | MM/DD/YY | Screen 0 |   \    |  &amp;    |$(dollar)|
+-----------------------------------------------------------------------------</code></pre>
+<h3 id="escape-sequence">Escape sequence</h3>
+<p>MSX has the escape sequence feature (see <a
+href="Appendices8and10.md#appendix-10---escape-sequences">Appendix
+10</a>), which can be used in the PRINT statement of BASIC, and in
+console output of BIOS or BDOS call (MSX-DOS). The escape sequence
+feature is a subset of DEC VT52 terminal and Heathkit H19 terminal.</p>
+<h3 id="returning-to-basic">Returning to BASIC</h3>
+<p><em>Warm start</em></p>
+<p>After selecting a slot of MAIN-ROM, jump to 409BH of MAIN-ROM. If the
+work area of BASIC has not been destroyed, the BASIC prompt will be
+displayed. The contents of register and stack at the jump are
+ignored.</p>
+<p>Another way is to execute the next command in internal routine NEWSTT
+(see <a href="Chapter2.md#44-expansion-of-cmd-command">4.4 of Chapter
+2</a>) (see <a
+href="#figure-2.20-input-setting-of-newstt-for-the-warm-start">Figure
+2.20</a>)</p>
+<h4
+id="figure-2.20-input-setting-of-newstt-for-the-warm-start"><em>Figure
+2.20 Input setting of NEWSTT for the warm start</em></h4>
+<figure>
+<img
+src="../pics/Figure%202.20.png"
+alt="Figure 2.20" />
+<figcaption aria-hidden="true">Figure 2.20</figcaption>
+</figure>
+<h3 id="auto-start">Auto start</h3>
+<p>In the case of simple game cartridges which do not use the BIOS or
+BASIC work areas, the program can be invoked by writing a starting
+address for the program to “INIT” in ROM header. But using this method
+prevents the initial settings of another cartridge, so disk drives
+cannot be used.</p>
+<p>To prevent this, the hook “H.STKE” is at FEDAH; write the inter-slot
+call command in the program to be invoked at the execution on “INIT”
+routine of the cartridge, and return to the system by RET command. Then
+after initialising all cartridges and after preparing the DISK BASIC
+environment if there is a disk, the hook is called, so the objective
+program can be invoked. This method is also effective when there is no
+disk (see APPENDIX).</p>
+<p>
+ 
+</p>
+<h2 id="error-code-list">Error code list</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Message</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>NEXT without FOR</td>
+<td>There is no FOR statement corresponding with the NEXT
+statement.</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Syntax error</td>
+<td>There is an error in syntax.</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>RETURN without GOSUB</td>
+<td>The RETURN statement does not correspond to the GOSUB
+statement.</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Out of DATA</td>
+<td>There is no data to be READ by the READ statement.</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Illegal function call</td>
+<td>There is an error in the function or numeric value
+specification.</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Overflow</td>
+<td>The numeric value has overflow.</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Out of memory</td>
+<td>The free area has been exhausted.</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Undefined line number</td>
+<td>There is no such a line number in the program.</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>Subscript out of range</td>
+<td>The subscript value of the array variable exceeds the declared
+range.</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>Redimensioned array</td>
+<td>The array is declared twice.</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>Division by zero</td>
+<td>The attempt to divide by zero is made. The negative exponent of zero
+is done.</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>Illegal direct</td>
+<td>The statement which cannot be executed in the direct mode is carried
+out directly.</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>Type mismatch</td>
+<td>There is a conflict in the data types.</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>Out of string space</td>
+<td>The string space is exhausted.</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td>String too long</td>
+<td>The length of the string is longer than 255 characters.</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td>String formula too complex</td>
+<td>The specified string is too complex.</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td>Can’t CONTINUE</td>
+<td>The CONT command cannot be executed.</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td>Undefined user function</td>
+<td>An attempt was made to use the user-defined function which has not
+been defined by DEF FN statement.</td>
+</tr>
+<tr class="odd">
+<td>19</td>
+<td>Device I/O error</td>
+<td>An error occurred in input/output of device.</td>
+</tr>
+<tr class="even">
+<td>20</td>
+<td>Verify error</td>
+<td>The program on cassette and the one in memory are not the same.</td>
+</tr>
+<tr class="odd">
+<td>21</td>
+<td>No RESUME</td>
+<td>There is no RESUME statement in the error handling routine.</td>
+</tr>
+<tr class="even">
+<td>22</td>
+<td>RESUME without error</td>
+<td>The RESUME statement is used other than in the error handling
+routine.</td>
+</tr>
+<tr class="odd">
+<td>23</td>
+<td>Undefined.</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>24</td>
+<td>Missing operand</td>
+<td>Necessary parameters are not specified.</td>
+</tr>
+<tr class="odd">
+<td>25</td>
+<td>Line buffer overflow</td>
+<td>There are too many characters for the input data.</td>
+</tr>
+<tr class="even">
+<td>26 to 49</td>
+<td>Undefined.</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>50</td>
+<td>FIELD overflow</td>
+<td>The field size defined in FIELD statement exceeds 256 bytes.</td>
+</tr>
+<tr class="even">
+<td>51</td>
+<td>Internal error</td>
+<td>An error occurred inside BASIC.</td>
+</tr>
+<tr class="odd">
+<td>52</td>
+<td>Bad file number</td>
+<td>File number which has not been OPENed is specified. The specified
+file number exceeds the number specified in MAXFILES statement.</td>
+</tr>
+<tr class="even">
+<td>53</td>
+<td>File not found</td>
+<td>The specified file is not found.</td>
+</tr>
+<tr class="odd">
+<td>54</td>
+<td>File already open</td>
+<td>The file has already been OPENed.</td>
+</tr>
+<tr class="even">
+<td>55</td>
+<td>Input past end</td>
+<td>The attempt to read the file is made after reading the end of
+it.</td>
+</tr>
+<tr class="odd">
+<td>56</td>
+<td>Bad file name</td>
+<td>There is an error in the specification of the file name.</td>
+</tr>
+<tr class="even">
+<td>57</td>
+<td>Direct statement</td>
+<td>Data other than the program is found while loading the ASCII format
+program.</td>
+</tr>
+<tr class="odd">
+<td>58</td>
+<td>Sequential I/O only</td>
+<td>Random access to the sequential file is made.</td>
+</tr>
+<tr class="even">
+<td>59</td>
+<td>File not OPEN</td>
+<td>The specified file has not been OPENed yet.</td>
+</tr>
+<tr class="odd">
+<td>60</td>
+<td>Bad FAT</td>
+<td>Unusual disk format.</td>
+</tr>
+<tr class="even">
+<td>61</td>
+<td>Bad file mode</td>
+<td>An incorrect input/output operation is made in the OPENed mode.</td>
+</tr>
+<tr class="odd">
+<td>62</td>
+<td>Bad drive name</td>
+<td>There is an error in the drive name specification.</td>
+</tr>
+<tr class="even">
+<td>63</td>
+<td>Bad sector number</td>
+<td>There is an error in the sector number.</td>
+</tr>
+<tr class="odd">
+<td>64</td>
+<td>File still open</td>
+<td>The file has not been closed.</td>
+</tr>
+<tr class="even">
+<td>65</td>
+<td>File already exists</td>
+<td>The file name specified in NAME statement already exists on the
+disk.</td>
+</tr>
+<tr class="odd">
+<td>66</td>
+<td>Disk full</td>
+<td>The free area of the disk has been exhausted.</td>
+</tr>
+<tr class="even">
+<td>67</td>
+<td>Too many files</td>
+<td>The number of files exceeds 112 (the directory space has been
+exhausted).</td>
+</tr>
+<tr class="odd">
+<td>68</td>
+<td>Disk write protected</td>
+<td>The disk is protected from writing.</td>
+</tr>
+<tr class="even">
+<td>69</td>
+<td>Disk I/O error</td>
+<td>Some trouble occurred in the disk input/output.</td>
+</tr>
+<tr class="odd">
+<td>70</td>
+<td>Disk offline</td>
+<td>The diskette is not in.</td>
+</tr>
+<tr class="even">
+<td>71</td>
+<td>Rename accross disk</td>
+<td>NAME statement is done across different disks.</td>
+</tr>
+<tr class="odd">
+<td>72</td>
+<td>File write protected</td>
+<td>The file has the read-only attribute set.</td>
+</tr>
+<tr class="even">
+<td>73</td>
+<td>Directory already exists</td>
+<td>The directory name specified in CALL MKDIR statement already
+exists.</td>
+</tr>
+<tr class="odd">
+<td>74</td>
+<td>Directory not found</td>
+<td>The specified directory is not found.</td>
+</tr>
+<tr class="even">
+<td>75</td>
+<td>RAM disk already exists</td>
+<td>Attempt to create the DOS 2 RAM disk when it already exists is
+made.</td>
+</tr>
+<tr class="odd">
+<td>76 to 255</td>
+<td>Undefined.</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Note:</strong> Errors with codes 72 to 75 are added from
+version 2 of MSX DISK-BASIC. In version 1 they are undefined.</li>
+</ul>
+<p>Use larger numbers first for user error definition.</p>
+<p>
+ 
+</p>
+<h2 id="changes-from-the-original">Changes from the original</h2>
+<ul>
+<li><p>In description of REM statement, <code>[&lt;comment&gt;]</code>
+field has been added.</p></li>
+<li><p>In description of SGN function, <em>“Examines the sign and
+returns…”</em> has been changed to <em>“Examines the sign of
+<code>&lt;expression&gt;</code> and returns…”</em></p></li>
+<li><p>Descriptions for MSX DISK-BASIC statements DSKI$ and DSKO$ have
+been added.</p></li>
+<li><p>Descriptions for new commands on MSX DISK-BASIC version 2 have
+been added.</p></li>
+<li><p>In <a href="#table-2.20-list-of-intermediate-codes">Table 2.20
+(List of intermediate codes)</a>, the code “FC” is shown as assigned to
+“" as it is actually, and not to”$” as in the original text.</p></li>
+<li><p>In <a href="#list-2.3-changing-error-handling-routine">List 2.3
+(Changing error handling routine)</a>, the third line of “command
+initialize”, which is “LD HL,CMDHDAT” in the original, is corrected to
+“LD HL,HDAT”.</p></li>
+<li><p>In <a href="#notes-on-software-development">Section 5, “Notes
+on Software Development”</a>, subsection “BASIC version number”, the
+part “and so on” has been added in point 1.</p></li>
+<li><p>In <a href="#error-code-list">Error code list</a>, description of
+errors 72 to 75 have been added.</p></li>
+</ul>

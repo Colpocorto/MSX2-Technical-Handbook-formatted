@@ -1,0 +1,231 @@
+<h1 id="appendix-3---bit-block-transfer">APPENDIX 3 - BIT BLOCK
+TRANSFER</h1>
+<p>The bit block transfer corresponds to the COPY command in BASIC and
+is used to transfer data from RAM, VRAM, and the disk. It is easily
+executed by the routine in expansion ROM and available from the assembly
+language program. Since it is in expansion ROM, use SUBROM or EXTROM of
+BIOS for this routine.</p>
+<p>
+ 
+</p>
+<h2 id="index">Index</h2>
+<p><a href="#transferring-in-vram">1. Transferring in VRAM</a></p>
+<p><a href="#transferring-data-between-ram-and-vram">2. Transferring
+data between RAM and VRAM</a></p>
+<p><a href="#transferring-between-the-disk-and-ram-or-vram">3.
+Transferring between the disk and RAM or VRAM</a></p>
+<p>
+ 
+</p>
+<h2 id="transferring-in-vram">1. Transferring in VRAM</h2>
+<h4 id="bltvv-0191hsub">BLTVV (0191H/SUB)</h4>
+<ul>
+<li><strong>Function</strong>: transfers data in VRAM area</li>
+<li><strong>Input</strong>:
+<ul>
+<li>HL register ⟵ F562H</li>
+<li>The following parameters should be set:
+<ul>
+<li>SX (F562H, 2): X-coordinate of the source</li>
+<li>SY (F564H, 2): Y-coordinate of the source</li>
+<li>DX (F566H, 2): X-coordinate of the destination</li>
+<li>DY (F568H, 2): Y-coordinate of the destination</li>
+<li>NX (F56AH, 2): number of dots in the X direction</li>
+<li>NY (F56CH, 2): number of dots in the Y direction</li>
+<li>CDUMMY (F56EH, 1): dummy (not required to be set)</li>
+<li>ARG (F56FH, 1): selects the direction and expansion RAM (same as VDP
+R#45)</li>
+<li>LOGOP (F570H, 1): logical operation code (same as the logical
+operation code of VDP)</li>
+</ul></li>
+</ul></li>
+<li><strong>Output</strong>: the CY flag is reset</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h2 id="transferring-data-between-ram-and-vram">2. Transferring data
+between RAM and VRAM</h2>
+<p>To use the routines below, the following memory space should be
+allocated as graphic area for screen modes.</p>
+<ul>
+<li><p><strong>screen mode 6:</strong> number of dots in X direction
+times number of dots in Y direction/4 + 4</p></li>
+<li><p><strong>screen mode 5 or 7:</strong> number of dots in X
+direction times number of dots in Y direction/2 + 4</p></li>
+<li><p><strong>screen mode 8:</strong> number of dots in X direction
+times number of dots in Y direction/2 + 4</p></li>
+</ul>
+<p>Note to raise fractions.</p>
+<p>For disk or RAM, data to indicate the size is added as the array
+data. The first two bytes of data indicate the number of dots in X
+direction; the next two bytes indicate the number of dots in the Y
+direction.</p>
+<p>
+ 
+</p>
+<h4 id="bltvm-0195hsub">BLTVM (0195H/SUB)</h4>
+<ul>
+<li><strong>Function</strong>: transfers the array to VRAM</li>
+<li><strong>Input</strong>:
+<ul>
+<li>HL register ⟵ F562H</li>
+<li>The following parameters should be set:
+<ul>
+<li>DPTR (F562H, 2): source address of memory</li>
+<li>DUMMY (F564H, 2): dummy (not required to be set)</li>
+<li>DX (F566H, 2): X-coordinate of the destination</li>
+<li>DY (F568H, 2): Y-coordinate of the destination</li>
+<li>NX (F56AH, 2): number of dots in the X direction (not required to be
+set; this is already in the top of data to be transferred)</li>
+<li>NY (F56CH, 2): number of dots in the Y direction (not required to be
+set; this is already in the top of data to be transferred)</li>
+<li>CDUMMY (F56EH, 1): dummy (not required to be set)</li>
+<li>ARG (F56FH, 1): selects the direction and expansion RAM (same as VDP
+R#45)</li>
+<li>LOGOP (F570H, 1): logical operation code (same as the logical
+operation code of VDP)</li>
+</ul></li>
+</ul></li>
+<li><strong>Output</strong>: the CY flag is set when the number of data
+bytes to be transferred is incorrect</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="bltmv-0199hsub">BLTMV (0199H/SUB)</h4>
+<ul>
+<li><strong>Function</strong>: transfers to the array from VRAM</li>
+<li><strong>Input</strong>:
+<ul>
+<li>HL register ⟵ F562H</li>
+<li>The following parameters should be set:
+<ul>
+<li>SX (F562H, 2): X-coordinate of the source</li>
+<li>SY (F564H, 2): Y-coordinate of the source</li>
+<li>DPTR (F566H, 2): destination address of memory</li>
+<li>DUMMY (F568H, 2): dummy (not required to be set)</li>
+<li>NX (F56AH, 2): number of dots in the X direction</li>
+<li>NY (F56CH, 2): number of dots in the Y direction</li>
+<li>CDUMMY (F56EH, 1): dummy (not required to be set)</li>
+<li>ARG (F56FH, 1): selects the direction and expansion RAM (same as VDP
+R#45)</li>
+</ul></li>
+</ul></li>
+<li><strong>Output</strong>: the CY flag is reset</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h2 id="transferring-between-the-disk-and-ram-or-vram">3. Transferring
+between the disk and RAM or VRAM</h2>
+<p>The filename should be set first to use the disk (specify the
+filename as BASIC). The following is an example:</p>
+<pre><code>                .
+                .
+                .
+        LD      HL,FNAME                ; Get pointer to file name
+        LD      (FNPTR),HL              ; Set it to parameter area
+                .
+                .
+                .
+FNAME:  DB 22H,&quot;B:TEST.PIC&quot;,22H,0       ; &quot;TEST.PIC&quot;, end mark</code></pre>
+<p>When an error occurs, control jumps to the error handler of the BASIC
+interpreter. Set the hook to handle the error in the user program or to
+call this routine from MSX-DOS or a ROM cartridge. This hook is H.ERRO
+(FFB1H).</p>
+<p>
+ 
+</p>
+<h4 id="bltvd-019dhsub">BLTVD (019DH/SUB)</h4>
+<ul>
+<li><strong>Function</strong>: transfers from disk to VRAM</li>
+<li><strong>Input</strong>:
+<ul>
+<li>HL register ⟵ F562H</li>
+<li>The following parameters should be set:
+<ul>
+<li>FNPTR (F562H, 2): address of the filename</li>
+<li>DUMMY (F564H, 2): dummy (not required to be set)</li>
+<li>DX (F566H, 2): X-coordinate of the destination</li>
+<li>DY (F568H, 2): Y-coordinate of the destination</li>
+<li>NX (F56AH, 2): number of dots in the X direction (not required to be
+set; this is already in the top of data to be transferred)</li>
+<li>NY (F56CH, 2): number of dots in the Y direction (not required to be
+set; this is already in the top of data to be transferred)</li>
+<li>CDUMMY (F56EH, 1): dummy (not required to be set)</li>
+<li>ARG (F56FH, 1): selects the direction and expansion RAM (same as VDP
+R#45)</li>
+<li>LOGOP (F570H, 1): logical operation code (same as the logical
+operation code of VDP)</li>
+</ul></li>
+</ul></li>
+<li><strong>Output</strong>: the CY flag is set when there is an error
+in the parameter</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="bltdv-01a1hsub">BLTDV (01A1H/SUB)</h4>
+<ul>
+<li><strong>Function</strong>: transfers from VRAM to disk</li>
+<li><strong>Input</strong>:
+<ul>
+<li>HL register ⟵ F562H</li>
+<li>The following parameters should be set:
+<ul>
+<li>SX (F562H, 2): X-coordinate of the source</li>
+<li>SY (F564H, 2): Y-coordinate of the source</li>
+<li>FNPTR (F566H, 2): address of the filename</li>
+<li>DUMMY (F568H, 2): dummy (not required to be set)</li>
+<li>NX (F56AH, 2): number of dots in the X direction</li>
+<li>NY (F56CH, 2): number of dots in the Y direction</li>
+<li>CDUMMY (F56EH, 1): dummy (not required to be set)</li>
+</ul></li>
+</ul></li>
+<li><strong>Output</strong>: the CY flag is reset</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="bltmd-01a5hsub">BLTMD (01A5H/SUB)</h4>
+<ul>
+<li><strong>Function</strong>: loads array data from disk</li>
+<li><strong>Input</strong>:
+<ul>
+<li>HL register ⟵ F562H</li>
+<li>The following parameters should be set:
+<ul>
+<li>FNPTR (F562H, 2): address of the filename</li>
+<li>SY (F564H, 2): dummy (not required to be set)</li>
+<li>SPTR (F566H, 2): the starting address for loading</li>
+<li>EPTR (F568H, 2): the end address for loading</li>
+</ul></li>
+</ul></li>
+<li><strong>Output</strong>: the CY flag is reset</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="bltdm-01a9hsub">BLTDM (01A9H/SUB)</h4>
+<ul>
+<li><strong>Function</strong>: saves array data to disk</li>
+<li><strong>Input</strong>:
+<ul>
+<li>HL register ⟵ F562H</li>
+<li>The following parameters should be set:
+<ul>
+<li>SPTR (F562H, 2): the starting address for saving</li>
+<li>EPTR (F564H, 2): the end address for saving</li>
+<li>FNPTR (F566H, 2): address of the filename</li>
+</ul></li>
+</ul></li>
+<li><strong>Output</strong>: the CY flag is reset</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
