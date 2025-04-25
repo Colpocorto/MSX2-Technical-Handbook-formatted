@@ -1,0 +1,135 @@
+<h1 id="appendix-6---io-map">APPENDIX 6 - I/O MAP</h1>
+<p>
+ 
+</p>
+<ul>
+<li><p><strong>00H to 3FH</strong>: user defined</p></li>
+<li><p><strong>40H to 7FH</strong>: reserved</p></li>
+<li><p><strong>80H to 87H</strong>: for RS-232C</p>
+<ul>
+<li>80H: 8251 data</li>
+<li>81H: 8251 status/command</li>
+<li>82H: status read/interrupt mask</li>
+<li>83H: unused</li>
+<li>84H: 8253</li>
+<li>85H: 8253</li>
+<li>86H: 8253</li>
+<li>87H: 8253</li>
+</ul></li>
+<li><p><strong>88H to 8BH</strong>: VDP (9938) I/O port for MSX1
+adaptor</p>
+<p>This is V9938 I/O for MSX1. To access VDP directly, examine 06H and
+07H of MAIN-ROM to confirm the port address</p></li>
+<li><p><strong>8CH to 8DH</strong>: for the modem</p></li>
+<li><p><strong>8EH to 8FH</strong>: reserved</p></li>
+<li><p><strong>90H to 91H</strong>: printer port</p>
+<ul>
+<li>90H
+<ul>
+<li>bit 0: strobe output (write)</li>
+<li>bit 1: status input (read)</li>
+</ul></li>
+<li>91H: data to be printed</li>
+</ul></li>
+<li><p><strong>92H to 97H</strong>: reserved</p></li>
+<li><p><strong>98H to 9BH</strong>: for MSX2 VDP (V9938)</p>
+<ul>
+<li>98H: VRAM access</li>
+<li>99H: command register access</li>
+<li>9AH: palette register access (write only)</li>
+<li>9BH: register pointer (write only)</li>
+</ul></li>
+<li><p><strong>9CH to 9FH</strong>: reserved</p></li>
+<li><p><strong>A0H to A3H</strong>: sound generator (AY-3-8910)</p>
+<ul>
+<li>A0H: address latch</li>
+<li>A1H: data read</li>
+<li>A2H: data write</li>
+</ul></li>
+<li><p><strong>A4H to A7H</strong>: reserved</p></li>
+<li><p><strong>A8H to ABH</strong>: parallel port (8255)</p>
+<ul>
+<li>A8H: port A</li>
+<li>A9H: port B</li>
+<li>AAH: port C</li>
+<li>ABH: mode set</li>
+</ul></li>
+<li><p><strong>ACH to AFH</strong>: MSX engine (one chip MSX
+I/O)</p></li>
+<li><p><strong>B0H to B3H</strong>: expansion memory (SONY
+specification) (8255)</p>
+<ul>
+<li>A8H: port A, address (A0 to A7)</li>
+<li>A9H: port B, address (A8 to A10, A13 to A15), control R/W</li>
+<li>AAH: port C, address (A11 to A12), data (D0 - D7)</li>
+<li>ABH: mode set</li>
+</ul></li>
+<li><p><strong>B4H to B5H</strong>: CLOCK-IC (RP-5C01)</p>
+<ul>
+<li>B4H: address latch</li>
+<li>B5H: data</li>
+</ul></li>
+<li><p><strong>B6H to B7H</strong>: reserved</p></li>
+<li><p><strong>B8H to BBH</strong>: lightpen control (SANYO
+specification)</p>
+<ul>
+<li>B8H: read/write</li>
+<li>B9H: read/write</li>
+<li>BAH: read/write</li>
+<li>BBH: write only</li>
+</ul></li>
+<li><p><strong>BCH to BFH</strong>: VHD control (JVC) (8255)</p>
+<ul>
+<li>BCH: port A</li>
+<li>BDH: port B</li>
+<li>BEH: port C</li>
+</ul></li>
+<li><p><strong>C0H to C1H</strong>: MSX-Audio</p></li>
+<li><p><strong>C2H to C7H</strong>: reserved</p></li>
+<li><p><strong>C8H to CFH</strong>: MSX interface</p></li>
+<li><p><strong>D0H to D7H</strong>: floppy disk controller (FDC)</p>
+<p>The floppy disk controller can be interrupted by an external signal.
+Interrupt is possible only when the FDC is accessed. Thus, the system
+can treat different FDC interfaces.</p></li>
+<li><p><strong>D8 to D9H</strong>: kanji ROM (TOSHIBA specification)</p>
+<ul>
+<li>D8H: b5-b0, lower address (write only)</li>
+<li>D9H
+<ul>
+<li>b5-b0: upper address (write)</li>
+<li>b7-b0: data (read)</li>
+</ul></li>
+</ul></li>
+<li><p><strong>DAH to DBH</strong>: for future kanji expansion</p></li>
+<li><p><strong>DCH to F4H</strong>: reserved</p></li>
+<li><p><strong>F5H</strong>: system control (write only), setting bit to
+1 enables available I/O devices</p>
+<ul>
+<li>b0: kanji ROM</li>
+<li>b1: reserved for kanji</li>
+<li>b2: MSX-AUDIO</li>
+<li>b3: superimpose</li>
+<li>b4: MSX interface</li>
+<li>b5: RS-232C</li>
+<li>b6: lightpen</li>
+<li>b7: CLOCK-IC (only on MSX2)</li>
+</ul>
+<p>Bits to void the conflict between internal I/O devices or those
+connected by cartridge. The bits can disable the internal devices. When
+BIOS is initialised, internal devices are valid if no external devices
+are connected. Applications may not write to or read from here.</p></li>
+<li><p><strong>F8H</strong>: colour bus I/O</p></li>
+<li><p><strong>F7H</strong>: A/V control</p>
+<ul>
+<li>b0: audio R - mixing ON (write)</li>
+<li>b1: audio L - mixing OFF (write)</li>
+<li>b2: select video input - 21p RGB (write)</li>
+<li>b3: detect video input - no input (read)</li>
+<li>b4: AV control - TV (write)</li>
+<li>b5: Ym control - TV (write)</li>
+<li>b6: inverse of bit 4 of VDP register 9 (write)</li>
+<li>b7: inverse of bit 5 of VDP register 9 (write)</li>
+</ul></li>
+<li><p><strong>F8H to FBH</strong>: reserved</p></li>
+<li><p><strong>FCH to FFH</strong>: memory mapper</p></li>
+</ul>

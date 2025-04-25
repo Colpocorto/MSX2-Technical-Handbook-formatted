@@ -1,0 +1,1796 @@
+<h1 id="appendix-1---bios-listing">APPENDIX 1 - BIOS LISTING</h1>
+<p>This chapter lists the 126 BIOS entries available to the user.</p>
+<p>
+ 
+</p>
+<h2 id="index">Index</h2>
+<p><a href="#rsts">RSTs</a></p>
+<p><a href="#io-initialisation">I/O initialisation</a></p>
+<p><a href="#vdp-access">VDP access</a></p>
+<p><a href="#psg">PSG</a></p>
+<p><a href="#keyboard-crt-printer-input-output">Keyboard, CRT, printer
+input-output</a></p>
+<p><a href="#game-io-access">Game I/O access</a></p>
+<p><a href="#cassette-input-output-routine">Cassette input-output
+routine</a></p>
+<p><a href="#miscellaneous">Miscellaneous</a></p>
+<p><a href="#entries-appended-for-msx2">Entries appended for
+MSX2</a></p>
+<p><a href="#sub-rom">SUB-ROM</a></p>
+<p><a href="#changes-from-the-original">Changes from the
+original</a></p>
+<p>
+ 
+</p>
+<p>There are two kinds of BIOS routines, the ones in MAIN-ROM and the
+ones in SUB-ROM. They each have different calling sequences which will
+be described later. The following is the entry notation.</p>
+<p><strong>Label name (address)</strong> *n<em> </em>
+<strong>Function</strong>: descriptions and notes about the function *
+<strong>Input</strong>: parameters used by call *
+<strong>Output</strong>: parameters returned by call *
+<strong>Registers</strong>: registers which will be used (original
+contentes are lost)</p>
+<p>The value of <strong>*n</strong> has the following meanings.</p>
+<ul>
+<li><strong>*1</strong>: same as MSX1</li>
+<li><strong>*2</strong>: call SUB-ROM internally in screen modes 5 to
+8</li>
+<li><strong>*3</strong>: always call SUB-ROM</li>
+<li><strong>*4</strong>: do not call SUB-ROM while screen modes 4 to 8
+are changed</li>
+</ul>
+<p>Routines without <strong>*n</strong> are appended for MSX2.</p>
+<p>
+ 
+</p>
+<h2 id="main-rom">MAIN-ROM</h2>
+<p>To call routines in MAIN-ROM, the CALL or RTS instruction is used as
+an ordinary subroutine call.</p>
+<p>
+ 
+</p>
+<h3 id="rsts">RSTs</h3>
+<p>Among the following RSTs, RST 00H to RST 28H are used by the BASIC
+interpreter. RST 30H is used for inter-slot calls and RST 38H is used
+for hardware interrupts.</p>
+<p>
+ 
+</p>
+<h4 id="chkram-0000h-1">CHKRAM (0000H) *1</h4>
+<ul>
+<li><strong>Function</strong>: tests RAM and sets RAM slot for the
+system</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="synchr-0008h-1">SYNCHR (0008H) *1</h4>
+<ul>
+<li><strong>Function</strong>: tests whether the character of [HL] is
+the specified character. If not, it generates SYNTAX ERROR, otherwise it
+goes to <a href="#chrgtr-0010h-1">CHRGTR</a> (0010H).</li>
+<li><strong>Input</strong>: set the character to be tested in [HL] and
+the character to be compared next to RST instruction which calls this
+routine (inline parameter).</li>
+</ul>
+<pre><code>Example:        LD      HL,LETTER
+                RST     08H
+                DB      &quot;A&quot;
+                         .
+                         .
+                         .
+        LETTER: DB      &quot;B&quot;</code></pre>
+<ul>
+<li><strong>Output</strong>: HL is increased by one and A receives [HL].
+When the tested character is numerical, the CY flag is set; the end of
+the statement (00H or 3AH) causes the Z flag to be set.</li>
+<li><strong>Registers</strong>: AF, HL</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="rdslt-000ch-1">RDSLT (000CH) *1</h4>
+<ul>
+<li><strong>Function</strong>: selects the slot corresponding to the
+value of A and reads one byte from the memory of the slot. When this
+routine is called, the interrupt is inhibited and remains inhibited even
+after execution ends.</li>
+<li><strong>Input</strong>: A for the slot number (see format below), HL
+for the address of memory to be read</li>
+</ul>
+<pre><code> F000EEPP
+ -   ----
+ |   ||++-------------- Basic slot number (0 to 3)
+ |   ++---------------- Expansion slot number (0 to 3)
+ +--------------------- &quot;1&quot; when using expansion slot</code></pre>
+<ul>
+<li><strong>Output</strong>: the value of memory which has been read in
+A</li>
+<li><strong>Registers</strong>: AF, BC, DE</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="chrgtr-0010h-1">CHRGTR (0010H) *1</h4>
+<ul>
+<li><strong>Function</strong>: gets a character (or a token) from BASIC
+text</li>
+<li><strong>Input</strong>: [HL] for the character to be read</li>
+<li><strong>Output</strong>: HL is incremented by one and A receives
+[HL]. When the character is numerical, the CY flag is set; the end of
+the statement causes the Z flag to be set.</li>
+<li><strong>Registers</strong>: AF, HL</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="wrslt-0014h-1">WRSLT (0014H) *1</h4>
+<ul>
+<li><strong>Function</strong>: selects the slot corresponding to the
+value of A and writes one byte to the memory of the slot. When this
+routine is called, interrupts are inhibited and remain so even after
+execution ends.</li>
+<li><strong>Input</strong>: specifies a slot with A (same as <a
+href="#rdslt-000ch-1">RDSLT</a>)</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF, BC, D</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="outdo-0018h-2">OUTDO (0018H) *2</h4>
+<ul>
+<li><strong>Function</strong>: sends the value to current device</li>
+<li><strong>Input</strong>: A for the value to be sent
+<ul>
+<li>sends output to the printer when PTRFLG (F416H) is other than 0</li>
+<li>sends output to the file specified by PTRFIL (F864H) when PTRFIL is
+other than 0</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: none</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="calslt-001ch-1">CALSLT (001CH) *1</h4>
+<ul>
+<li><strong>Function</strong>: calls the routine in another slot
+(inter-slot call)</li>
+<li><strong>Input</strong>: specify the slot in the 8 high order buts of
+the IY register (same as <a href="#rdslt-000ch-1">RDSLT</a>). IX is for
+the address to be called.</li>
+<li><strong>Output</strong>: depends on the calling routine</li>
+<li><strong>Registers</strong>: depends on the calling routine</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="dcompr-0020h-1">DCOMPR (0020H) *1</h4>
+<ul>
+<li><strong>Function</strong>: compares the contents of HL and DE</li>
+<li><strong>Input</strong>: HL, DE</li>
+<li><strong>Output</strong>: sets the Z flag for HL = DE, CY flag for HL
+&lt; DE</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="enaslt-0024h-1">ENASLT (0024H) *1</h4>
+<ul>
+<li><strong>Function</strong>: selects the slot corresponding to the
+value of A and enables the slot to be used. When this routine is called,
+interrupts are inhibited and remain so even after execution ends.</li>
+<li><strong>Input</strong>:
+<ul>
+<li>specify the slot by A (same as <a
+href="#rdslt-000ch-1">RDSLT</a>)</li>
+<li>specify the page to switch the slot by 2 high order bits of HL</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="getypr-0028h-1">GETYPR (0028H) *1</h4>
+<ul>
+<li><strong>Function</strong>: returns the type of DAC (decimal
+accumulator)</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: S, Z, P/V flags are changed depending on
+the type of DAC:</li>
+</ul>
+<pre><code>integer type                    single precision real type
+   C = 1                                C = 1
+   S = 1 *                              S = 0
+   Z = 0                                Z = 0
+   P/V = 1                              P/V = 0 *
+
+string type                     double precision real type
+   C = 1                                C = 0 *
+   S = 0                                S = 0
+   Z = 1 *                              Z = 0
+   P/V = 1                              P/V = 1
+
+Types can be recognised by the flag marked by &quot;*&quot;.</code></pre>
+<ul>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="callf-0030h-1">CALLF (0030H) *1</h4>
+<ul>
+<li><strong>Function</strong>: calls the routine in another slot. The
+following is the calling sequence:</li>
+</ul>
+<pre><code>        RST     30H
+        DB      n       ;n is the slot number (same as RDSLT)
+        DW      nn      ;nn is the called address</code></pre>
+<ul>
+<li><strong>Input</strong>: In the method described above</li>
+<li><strong>Output</strong>: depends on the calling routine</li>
+<li><strong>Registers</strong>: AF, and other registers depending on the
+calling routine</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="keyint-0038h-1">KEYINT (0038H) *1</h4>
+<ul>
+<li><strong>Function</strong>: executes the timer interrupt process
+routine</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: none</li>
+</ul>
+<p>
+ 
+</p>
+<h3 id="io-initialisation">I/O initialisation</h3>
+<p>
+ 
+</p>
+<h4 id="initio-003bh-1">INITIO (003BH) *1</h4>
+<ul>
+<li><strong>Function</strong>: initialises the device</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="inifnk-003eh-1">INIFNK (003EH) *1</h4>
+<ul>
+<li><strong>Function</strong>: initialises the contents of function
+keys</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h3 id="vdp-access">VDP access</h3>
+<p>
+ 
+</p>
+<h4 id="disscr-0041h-1">DISSCR (0041H) *1</h4>
+<ul>
+<li><strong>Function</strong>: inhibits the screen display</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF, BC</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="enascr-0044h-1">ENASCR (0044H) *1</h4>
+<ul>
+<li><strong>Function</strong>: displays the screen</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="wrtvdp-0047h-2">WRTVDP (0047H) *2</h4>
+<ul>
+<li><strong>Function</strong>: writes data in the VDP register</li>
+<li><strong>Input</strong>: C for the register number, B for data; the
+register number is 0 to 23 and 32 to 46</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF, BC</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="rdvrm-004ah-1">RDVRM (004AH) *1</h4>
+<ul>
+<li><strong>Function</strong>: reads the contents of VRAM. This is for
+TMS9918, so only the 14 low order bits of the VRAM address are valid. To
+use all bits, call <a href="#nrdvrm-0174h">NRDVRM</a>.</li>
+<li><strong>Input</strong>: HL for VRAM address to be read</li>
+<li><strong>Output</strong>: A for the value which was read</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="wrtvrm-004dh-1">WRTVRM (004DH) *1</h4>
+<ul>
+<li><strong>Function</strong>: writes data in VRAM. This is for TMS9918,
+so only the 14 low order bits of the VRAM address are valid. To use all
+bits, call <a href="#nwrvrm-0177h">NWRVRM</a>.</li>
+<li><strong>Input</strong>: HL for VRAM address, A for data</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="setrd-0050h-1">SETRD (0050H) *1</h4>
+<ul>
+<li><strong>Function</strong>: sets VRAM address to VDP and enables it
+to be read. This is used to read data from the sequential VRAM area by
+using the address auto-increment function of VDP. This enables faster
+readout than using <a href="#rdvrm-004ah-1">RDVRM</a> in a loop. This is
+for TMS9918, so only the 14 low order bits of VRAM address are valid. To
+use all bits, call <a href="#nsetrd-016eh">NSETRD</a>.</li>
+<li><strong>Input</strong>: HL for VRAM address</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="setwrt-0053h-1">SETWRT (0053H) *1</h4>
+<ul>
+<li><strong>Function</strong>: sets VRAM address to VDP and enables it
+to be written. The purpose is the same as <a
+href="#setrd-0050h-1">SETRD</a>. This is for TMS9918, so only the 14 low
+order bits of VRAM address are valid. To use all bits, call <a
+href="#nsetrd-016eh">NSETRD</a>.</li>
+<li><strong>Input</strong>: HL for VRAM address</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="filvrm-0056h-4">FILVRM (0056H) *4</h4>
+<ul>
+<li><strong>Function</strong>: fills the specified VRAM area with the
+same data. This is for TMS9918, so only the 14 low order bits of the
+VRAM address are valid. To use all bits, see <a
+href="#bigfil-016bh">BIGFIL</a>.</li>
+<li><strong>Input</strong>: HL for VRAM address to begin writing, BC for
+the length of the area to be written, A for data.</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF, BC</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="ldirmv-0059h-4">LDIRMV (0059H) *4</h4>
+<ul>
+<li><strong>Function</strong>: block transfer from VRAM to memory</li>
+<li><strong>Input</strong>: HL for source address (VRAM), DE for
+destination address (memory), BC for the length. All bits of the VRAM
+address are valid.</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="ldirvm-005ch-4">LDIRVM (005CH) *4</h4>
+<ul>
+<li><strong>Function</strong>: block transfer from memory to VRAM</li>
+<li><strong>Input</strong>: HL for source address (memory), DE for
+destination address (VRAM), BC for the length. All bits of the VRAM
+address are valid.</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="chgmod-005fh-3">CHGMOD (005FH) *3</h4>
+<ul>
+<li><strong>Function</strong>: changes the screen mode. The palette is
+not initialised. To initialise it, see <a
+href="#chgmdp-01b5h">CHGMDP</a> in SUB-ROM.</li>
+<li><strong>Input</strong>: A for the screen mode (0 to 8)</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="chgclr-0062h-1">CHGCLR (0062H) *1</h4>
+<ul>
+<li><strong>Function</strong>: changes the screen colour</li>
+<li><strong>Input</strong>:
+<ul>
+<li>A for the mode</li>
+<li>FORCLR (F3E9H) for foreground color</li>
+<li>BAKCLR (F3EAH) for background color</li>
+<li>BDRCLR (F3EBH) for border colour</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="nmi-0066h-1">NMI (0066H) *1</h4>
+<ul>
+<li><strong>Function</strong>: executes NMI (Non-Maskable Interrupt)
+handling routine</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: none</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="clrspr-0069h-3">CLRSPR (0069H) *3</h4>
+<ul>
+<li><strong>Function</strong>: initialises all sprites. The sprite
+pattern is cleared to null, the sprite number to the sprite plane
+number, the sprite colour to the foregtound colour. The vertical
+location of the sprite is set to 209 (mode 0 to 3) or 217 (mode 4 to
+8).</li>
+<li><strong>Input</strong>: SCRMOD (FCAFH) for the screen mode</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="initxt-006ch-3">INITXT (006CH) *3</h4>
+<ul>
+<li><strong>Function</strong>: initialises the screen to TEXT1 mode (40
+x 24). In this routine, the palette is not initialised. To initialise
+the palette, call <a href="#iniplt-0141h">INIPLT</a> in SUB-ROM after
+this call.</li>
+<li><strong>Input</strong>:
+<ul>
+<li>TXTNAM (F3B3H) for the pattern name table</li>
+<li>TXTCGP (F3B7H) for the pattern generator table</li>
+<li>LINL40 (F3AEH) for the length of one line</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="init32-006fh-3">INIT32 (006FH) *3</h4>
+<ul>
+<li><strong>Function</strong>: initialises the screen to GRAPHIC1 mode
+(32x24). In this routine, the palette is not initialised.</li>
+<li><strong>Input</strong>:
+<ul>
+<li>T32NAM (F3BDH) for the pattern name table</li>
+<li>T32COL (F3BFH) for the colour table</li>
+<li>T32CGP (F3C1H) for the pattern generator table</li>
+<li>T32ATR (F3C3H) for the sprite attribute table</li>
+<li>T32PAT (F3C5H) for the sprite generator table</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="inigrp-0072h-3">INIGRP (0072H) *3</h4>
+<ul>
+<li><strong>Function</strong>: initialises the screen to the
+high-resolution graphics mode. In this routine, the palette is not
+initialised.</li>
+<li><strong>Input</strong>:
+<ul>
+<li>GRPNAM (F3C7H) for the pattern name table</li>
+<li>GRPCOL (F3C9H) for the colour table</li>
+<li>GRPCGP (F3CBH) for the pattern generator table</li>
+<li>GRPATR (F3CDH) for the sprite attribute table</li>
+<li>GRPPAT (F3CFH) for the sprite generator table</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="inimlt-0075h-3">INIMLT (0075H) *3</h4>
+<ul>
+<li><strong>Function</strong>: initialises the screen to MULTI colour
+mode. In this routine, the palette is not initialised.</li>
+<li><strong>Input</strong>:
+<ul>
+<li>MLTNAM (F3D1H) for the pattern name table</li>
+<li>MLTCOL (F3D3H) for the colour table</li>
+<li>MLTCGP (F3D5H) for the pattern generator table</li>
+<li>MLTATR (F3D7H) for the sprite attribute table</li>
+<li>MLTPAT (F3D9H) for the sprite generator table</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="settxt-0078h-3">SETTXT (0078H) *3</h4>
+<ul>
+<li><strong>Function</strong>: set only VDP in TEXT1 mode (40x24)</li>
+<li><strong>Input</strong>: same as <a
+href="#initxt-006ch-3">INITXT</a></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="sett32-007bh-3">SETT32 (007BH) *3</h4>
+<ul>
+<li><strong>Function</strong>: set only VDP in GRAPHIC1 mode
+(32x24)</li>
+<li><strong>Input</strong>: same as <a
+href="#init32-006fh-3">INIT32</a></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="setgrp-007eh-3">SETGRP (007EH) *3</h4>
+<ul>
+<li><strong>Function</strong>: set only VDP in GRAPHIC2 mode</li>
+<li><strong>Input</strong>: same as <a
+href="#inigrp-0072h-3">INIGRP</a></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="setmlt-0081h-3">SETMLT (0081H) *3</h4>
+<ul>
+<li><strong>Function</strong>: set only VDP in MULTI colour mode</li>
+<li><strong>Input</strong>: same as <a
+href="#inimlt-0075h-3">INIMLT</a></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<h4 id="calpat-0084h-1">CALPAT (0084H) *1</h4>
+<ul>
+<li><strong>Function</strong>: returns the address of the sprite
+generator table</li>
+<li><strong>Input</strong>: A for the sprite number</li>
+<li><strong>Output</strong>: HL for the address</li>
+<li><strong>Registers</strong>: AF, DE, HL</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="calatr-0087h-1">CALATR (0087H) *1</h4>
+<ul>
+<li><strong>Function</strong>: returns the address of the sprite
+attribute table</li>
+<li><strong>Input</strong>: A for the sprite number</li>
+<li><strong>Output</strong>: HL for the address</li>
+<li><strong>Registers</strong>: AF, DE, HL</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="gspsiz-008ah-1">GSPSIZ (008AH) *1</h4>
+<ul>
+<li><strong>Function</strong>: returns the current sprite size</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: A for the sprite size (in bytes). Only when
+the size is 16 x 16, the CY flag is set; otherwise the CY flag is
+reset.</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="grpprt-008dh-2">GRPPRT (008DH) *2</h4>
+<ul>
+<li><strong>Function</strong>: displays a character on the graphic
+screen</li>
+<li><strong>Input</strong>: A for the character code. When the screen
+mode is 0 to 8, set the logical operation code in LOGOPR (FB02H).</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: none</li>
+</ul>
+<p>
+ 
+</p>
+<h3 id="psg">PSG</h3>
+<p>
+ 
+</p>
+<h4 id="gicini-0090h-1">GICINI (0090H) *1</h4>
+<ul>
+<li><strong>Function</strong>: initialises PSG and sets the initial
+value for the PLAY statement</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="wrtpsg-0093h-1">WRTPSG (0093H) *1</h4>
+<ul>
+<li><strong>Function</strong>: writes data in the PSG register</li>
+<li><strong>Input</strong>: A for PSG register number, E for data</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: none</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="rdpsg-0096h-1">RDPSG (0096H) *1</h4>
+<ul>
+<li><strong>Function</strong>: reads the PSG register value</li>
+<li><strong>Input</strong>: A for PSG register number</li>
+<li><strong>Output</strong>: A for the value which was read</li>
+<li><strong>Registers</strong>: none</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="strtms-0099h-1">STRTMS (0099H) *1</h4>
+<ul>
+<li><strong>Function</strong>: tests whether the PLAY statement is being
+executed as a background task. If not, begins to execute the PLAY
+statement</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h3 id="keyboard-crt-printer-input-output">Keyboard, CRT, printer
+input-output</h3>
+<p>
+ 
+</p>
+<h4 id="chsns-009ch-1">CHSNS (009CH) *1</h4>
+<ul>
+<li><strong>Function</strong>: tests the status of the keyboard
+buffer</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: the Z flag is set when the buffer is empty,
+otherwise the Z flag is reset</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="chget-009fh-1">CHGET (009FH) *1</h4>
+<ul>
+<li><strong>Function</strong>: one character input (waiting)</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: A for the code of the input character</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="chput-00a2h-1">CHPUT (00A2H) *1</h4>
+<ul>
+<li><strong>Function</strong>: displays the character</li>
+<li><strong>Input</strong>: A for the character code to be
+displayed</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: none</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="lptout-00a5h-1">LPTOUT (00A5H) *1</h4>
+<ul>
+<li><strong>Function</strong>: sends one character to the printer</li>
+<li><strong>Input</strong>: A for the character code to be sent</li>
+<li><strong>Output</strong>: if failed, the CY flag is set</li>
+<li><strong>Registers</strong>: F</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="lptstt-00a8h-1">LPTSTT (00A8H) *1</h4>
+<ul>
+<li><strong>Function</strong>: tests the printer status</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>:
+<ul>
+<li>when A is 255 and the Z flag is reset, the printer is READY.</li>
+<li>when A is 0 and the Z flag is set, the printer is NOT READY.</li>
+</ul></li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="cnvchr-00abh-1">CNVCHR (00ABH) *1</h4>
+<ul>
+<li><strong>Function</strong>: test for the graphic header and
+transforms the code</li>
+<li><strong>Input</strong>: A for the character code</li>
+<li><strong>Output</strong>:
+<ul>
+<li>the CY flag is reset to not the graphic header</li>
+<li>the CY flag and the Z flag are set to the transformed code is set in
+A</li>
+<li>the CY flag is set and the CY flag is reset to the untransformed
+code is set in A</li>
+</ul></li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="pinlin-00aeh-1">PINLIN (00AEH) *1</h4>
+<ul>
+<li><strong>Function</strong>: stores in the specified buffer the
+character codes input until the return key or STOP key is pressed.</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: HL for the starting address of the buffer
+minus 1, the CY flag is set only when it ends with the STOP key.</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="inlin-00b1h-1">INLIN (00B1H) *1</h4>
+<ul>
+<li><strong>Function</strong>: same as <a
+href="#pinlin-00aeh-1">PINLIN</a> except that AUTFLG (F6AAH) is set</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: HL for the starting address of the buffer
+minus 1, the CY flag is set only when it ends with the STOP key.</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="qinlin-00b4h-1">QINLIN (00B4H) *1</h4>
+<ul>
+<li><strong>Function</strong>: executes <a
+href="#inlin-00b1h-1">INLIN</a> with displaying “?” and one space</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: HL for the starting address of the buffer
+minus 1, the CY flag is set only when it ends with the STOP key.</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="breakx-00b7h-1">BREAKX (00B7H) *1</h4>
+<ul>
+<li><strong>Function</strong>: tests Ctrl-STOP key. In this routine,
+interrupts are inhibited.</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: the CY flag is set when pressed</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="beep-00c0h-3">BEEP (00C0H) *3</h4>
+<ul>
+<li><strong>Function</strong>: generates BEEP</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="cls-00c3h-3">CLS (00C3H) *3</h4>
+<ul>
+<li><strong>Function</strong>: clears the screen</li>
+<li><strong>Input</strong>: set zero flag</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF, BC, DE</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="posit-00c6h-1">POSIT (00C6H) *1</h4>
+<ul>
+<li><strong>Function</strong>: moves the cursor</li>
+<li><strong>Input</strong>: H for the X-coordinate of the cursor, L for
+the Y-coordinate</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="fnksb-00c9h-1">FNKSB (00C9H) *1</h4>
+<ul>
+<li><strong>Function</strong>: tests whether the function key display is
+active (FNKFLG). If so, displays them, otherwise erases them.</li>
+<li><strong>Input</strong>: FNKFLG (FBCEH)</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="erafnk-00cch-1">ERAFNK (00CCH) *1</h4>
+<ul>
+<li><strong>Function</strong>: erases the function key display</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="dspfnk-00cfh-2">DSPFNK (00CFH) *2</h4>
+<ul>
+<li><strong>Function</strong>: displays the function keys</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="totext-00d2h-1">TOTEXT (00D2H) *1</h4>
+<ul>
+<li><strong>Function</strong>: forces the screen to be in the text
+mode</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h3 id="game-io-access">Game I/O access</h3>
+<p>
+ 
+</p>
+<h4 id="gtstck-00d5h-1">GTSTCK (00D5H) *1</h4>
+<ul>
+<li><strong>Function</strong>: returns the joystick status</li>
+<li><strong>Input</strong>: A for the joystick number to be tested</li>
+<li><strong>Output</strong>: A for the joystick direction</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="gttrig-00d8h-1">GTTRIG (00D8H) *1</h4>
+<ul>
+<li><strong>Function</strong>: returns the trigger button status</li>
+<li><strong>Input</strong>: A for the trigger button number to be
+tested</li>
+<li><strong>Output</strong>:
+<ul>
+<li>When A is 0, the trigger button is not being pressed.</li>
+<li>When A is FFH, the trigger button is being pressed.</li>
+</ul></li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="gtpad-00dbh-1">GTPAD (00DBH) *1</h4>
+<ul>
+<li><strong>Function</strong>: returns the touch pad status</li>
+<li><strong>Input</strong>: A for the touch pad number to be tested</li>
+<li><strong>Output</strong>: A for the value</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="gtpdl-00deh-2">GTPDL (00DEH) *2</h4>
+<ul>
+<li><strong>Function</strong>: returns the paddle value</li>
+<li><strong>Input</strong>: A for the paddle number</li>
+<li><strong>Output</strong>: A for the value</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h3 id="cassette-input-output-routine">Cassette input-output
+routine</h3>
+<p>
+ 
+</p>
+<h4 id="tapion-00e1h-1">TAPION (00E1H) *1</h4>
+<ul>
+<li><strong>Function</strong>: reads the header block after turning the
+cassette motor ON.</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: if failed, the CY flag is set</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="tapin-00e4h-1">TAPIN (00E4H) *1</h4>
+<ul>
+<li><strong>Function</strong>: reads data from the tape</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: A for data. If failed, the CY flag is
+set.</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="tapiof-00e7h-1">TAPIOF (00E7H) *1</h4>
+<ul>
+<li><strong>Function</strong>: stops reading the tape</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: none</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="tapoon-00eah-1">TAPOON (00EAH) *1</h4>
+<ul>
+<li><strong>Function</strong>: writes the header block after turning the
+cassette motor ON</li>
+<li><strong>Input</strong>: A = 0, short header; A &lt;&gt; 0, long
+header</li>
+<li><strong>Output</strong>: if failed, the CY flag is set</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="tapout-00edh-1">TAPOUT (00EDH) *1</h4>
+<ul>
+<li><strong>Function</strong>: writes data on the tape</li>
+<li><strong>Input</strong>: A for data</li>
+<li><strong>Output</strong>: if failed, the CY flag is set</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="tapoof-00f0h-1">TAPOOF (00F0H) *1</h4>
+<ul>
+<li><strong>Function</strong>: stops writing to the tape</li>
+<li><strong>Input</strong>: A for data</li>
+<li><strong>Output</strong>: if failed, the CY flag is set</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="stmotr-00f3h-1">STMOTR (00F3H) *1</h4>
+<ul>
+<li><strong>Function</strong>: sets the cassette motor action</li>
+<li><strong>Input</strong>:
+<ul>
+<li>A = 0 ⟶ stop</li>
+<li>A = 1 ⟶ start</li>
+<li>A = 0FFH ⟶ reverse the current action</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h3 id="miscellaneous">Miscellaneous</h3>
+<p>
+ 
+</p>
+<h4 id="chgcap-0132h-1">CHGCAP (0132H) *1</h4>
+<ul>
+<li><strong>Function</strong>: alternates the CAP lamp status</li>
+<li><strong>Input</strong>:
+<ul>
+<li>A = 0 ⟶ lamp off</li>
+<li>A &lt;&gt;0 ⟶ lamp on</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="chgsnd-0135h-1">CHGSND (0135H) *1</h4>
+<ul>
+<li><strong>Function</strong>: alternates the 1-bit sound port
+status</li>
+<li><strong>Input</strong>:
+<ul>
+<li>A = 0 ⟶ OFF</li>
+<li>A &lt;&gt;0 ⟶ ON</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="rslreg-0138h-1">RSLREG (0138H) *1</h4>
+<ul>
+<li><strong>Function</strong>: reads the contents of current output to
+the basic slot register</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: A for the value which was read</li>
+<li><strong>Registers</strong>: A</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="wslreg-013bh-1">WSLREG (013BH) *1</h4>
+<ul>
+<li><strong>Function</strong>: writes to the primary slot register</li>
+<li><strong>Input</strong>: A for the value to be written</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: none</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="rdvdp-013eh-1">RDVDP (013EH) *1</h4>
+<ul>
+<li><strong>Function</strong>: reads VDP status register</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: A for the value which was read</li>
+<li><strong>Registers</strong>: A</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="snsmat-0141h-1">SNSMAT (0141H) *1</h4>
+<ul>
+<li><strong>Function</strong>: reads the value of the specified line
+from the keyboard matrix</li>
+<li><strong>Input</strong>: A for the specified line</li>
+<li><strong>Output</strong>: A for data (the bit corresponding to the
+pressed key will be 0)</li>
+<li><strong>Registers</strong>: AF, C</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="phydio-0144h">PHYDIO (0144H)</h4>
+<ul>
+<li><strong>Function</strong>: Physical input/output for disk
+devices</li>
+<li><strong>Input</strong>:
+<ul>
+<li>A for the drive number (0 = A:, 1 = B:,…)</li>
+<li>B for the number of sector to be read from or written to</li>
+<li>C for the media ID DE for the first sector number to be read rom or
+written to</li>
+<li>HL for the startinga address of the RAM buffer to be read from or
+written to specified sectors</li>
+<li>CY set for sector writing; reset for sector reading</li>
+</ul></li>
+<li><strong>Output</strong>:
+<ul>
+<li>CY set if failed</li>
+<li>B for the number of sectors actually read or written</li>
+<li>A for the error code (only if CY set):
+<ul>
+<li>0 = Write protected</li>
+<li>2 = Not ready</li>
+<li>4 = Data error</li>
+<li>6 = Seek error</li>
+<li>8 = Record not found</li>
+<li>10 = Write error</li>
+<li>12 = Bad parameter</li>
+<li>14 = Out of memory</li>
+<li>16 = Other error</li>
+</ul></li>
+</ul></li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="isflio-014ah-1">ISFLIO (014AH) *1</h4>
+<ul>
+<li><strong>Function</strong>: tests whether the device is active</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>:
+<ul>
+<li>A = 0 ⟶ active</li>
+<li>A &lt;&gt;0 ⟶ inactive</li>
+</ul></li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="outdlp-014dh-1">OUTDLP (014DH) *1</h4>
+<ul>
+<li><strong>Function</strong>: printer output. Different from <a
+href="#lptout-00a5h-1">LPTOUT</a> in the following points:</li>
+</ul>
+<ol type="1">
+<li>TAB is expanded to spaces</li>
+<li>For non-MSX printers, hiragana is transformed to katakana and
+graphic characters are transformed to 1-byte characters.</li>
+<li>If failed, device I/O error occurs.</li>
+</ol>
+<ul>
+<li><strong>Input</strong>: A for data</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: F</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="kilbuf-0156h-1">KILBUF (0156H) *1</h4>
+<ul>
+<li><strong>Function</strong>: clears the keyboard buffer</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: HL</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="calbas-0159h-1">CALBAS (0159H) *1</h4>
+<ul>
+<li><strong>Function</strong>: executes inter-slot call to the routine
+in BASIC interpreter</li>
+<li><strong>Input</strong>: IX for the calling address</li>
+<li><strong>Output</strong>: depends on the called routine</li>
+<li><strong>Registers</strong>: depends on the called routine</li>
+</ul>
+<p>
+ 
+</p>
+<h3 id="entries-appended-for-msx2">Entries appended for MSX2</h3>
+<p>
+ 
+</p>
+<h4 id="subrom-015ch">SUBROM (015CH)</h4>
+<ul>
+<li><strong>Function</strong>: executes inter-slot call to SUB-ROM</li>
+<li><strong>Input</strong>: IX for the calling address and, at the same
+time, pushes IX on the stack</li>
+<li><strong>Output</strong>: depends on the called routine</li>
+<li><strong>Registers</strong>: background registers and IY are
+reserved</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="extrom-015fh">EXTROM (015FH)</h4>
+<ul>
+<li><strong>Function</strong>: executes inter-slot call to SUB-ROM</li>
+<li><strong>Input</strong>: IX for the calling address</li>
+<li><strong>Output</strong>: depends on the called routine</li>
+<li><strong>Registers</strong>: background registers and IY are
+reserved</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="eol-0168h">EOL (0168H)</h4>
+<ul>
+<li><strong>Function</strong>: deletes to the end of the line</li>
+<li><strong>Input</strong>: H for X-coordinate of the cursor, L for
+Y-coordinate</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="bigfil-016bh">BIGFIL (016BH)</h4>
+<ul>
+<li><strong>Function</strong>: same function as <a
+href="#filvrm-0056h-4">FILVRM</a>. Differences are as follows:
+<ul>
+<li>In <a href="#filvrm-0056h-4">FILVRM</a>, it is tested whether the
+screen mode is 0 to 3. If so, it treats VDP as the one which has only
+16K bytes VRAM (for the compatibility with MSX1).</li>
+<li>In <a href="#bigfil-016bh">BIGFIL</a>, the mode is not tested and
+actions are carried out by the given parameters.</li>
+</ul></li>
+<li><strong>Input</strong>: same as <a
+href="#filvrm-0056h-4">FILVRM</a></li>
+<li><strong>Output</strong>: same as <a
+href="#filvrm-0056h-4">FILVRM</a></li>
+<li><strong>Registers</strong>: same as <a
+href="#filvrm-0056h-4">FILVRM</a></li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="nsetrd-016eh">NSETRD (016EH)</h4>
+<ul>
+<li><strong>Function</strong>: enables VRAM to be read by setting the
+address</li>
+<li><strong>Input</strong>: HL for VRAM address</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="nstwrt-0171h">NSTWRT (0171H)</h4>
+<ul>
+<li><strong>Function</strong>: enables VRAM to be written by setting the
+address</li>
+<li><strong>Input</strong>: HL for VRAM address</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="nrdvrm-0174h">NRDVRM (0174H)</h4>
+<ul>
+<li><strong>Function</strong>: reads the contents of VRAM</li>
+<li><strong>Input</strong>: HL for VRAM address to be read</li>
+<li><strong>Output</strong>: A for the value which was read</li>
+<li><strong>Registers</strong>: F</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="nwrvrm-0177h">NWRVRM (0177H)</h4>
+<ul>
+<li><strong>Function</strong>: writes data in VRAM</li>
+<li><strong>Input</strong>: HL for VRAM address, A for data</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h2 id="sub-rom">SUB-ROM</h2>
+<p>The calling sequence of SUB-ROM is as follows:</p>
+<pre><code>                .
+                .
+                .
+        LD      IX, INIPLT
+                         ; Set BIOS entry address
+        CALL    EXTROM
+                         ; Returns here
+                .
+                .
+                .</code></pre>
+<p>When the contents of IX should not be destroyed, use the call as
+shown below.</p>
+<pre><code>                .
+                .
+                .
+INIPAL: PUSH    IX
+                         ; Save IX
+        LD      IX, INIPLT
+                         ; Set BIOS entry address
+        JP      SUBROM
+                         ;Returns caller of INIPAL
+                .
+                .
+                .</code></pre>
+<p>
+ 
+</p>
+<h4 id="grprt-0089h">GRPRT (0089H)</h4>
+<ul>
+<li><strong>Function</strong>: one character output to the graphic
+screen (active only in screen modes 5 to 8)</li>
+<li><strong>Input</strong>: A for the character code</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: none</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="nvbxln-00c9h">NVBXLN (00C9H)</h4>
+<ul>
+<li><strong>Function</strong>: draws a box</li>
+<li><strong>Input</strong>:
+<ul>
+<li>start point: BC for X-coordinate, DE for Y-coordinate</li>
+<li>end point:
+<ul>
+<li>GXPOS (FCB3H) for X-coordinate</li>
+<li>GYPOS (FCB5H) for Y-coordinate</li>
+</ul></li>
+<li>colour: ATRBYT (F3F3H) for the attribute</li>
+<li>logical operation code: LOGOPR (FB02H)</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="nvbxfl-00cdh">NVBXFL (00CDH)</h4>
+<ul>
+<li><strong>Function</strong>: draws a painted box</li>
+<li><strong>Input</strong>:
+<ul>
+<li>start point: BC for X-coordinate, DE for Y-coordinate</li>
+<li>end point:
+<ul>
+<li>GXPOS (FCB3H) for X-coordinate</li>
+<li>GYPOS (FCB5H) for Y-coordinate</li>
+</ul></li>
+<li>colour: ATRBYT (F3F3H) for the attribute</li>
+<li>logical operation code: LOGOPR (FB02H)</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="chgmod-00d1h">CHGMOD (00D1H)</h4>
+<ul>
+<li><strong>Function</strong>: changes the screen mode</li>
+<li><strong>Input</strong>: A for the screen mode (0 to 8)</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="initxt-00d5h">INITXT (00D5H)</h4>
+<ul>
+<li><strong>Function</strong>: initialises the screen to TEXT1 mode (40
+x 24)</li>
+<li><strong>Input</strong>:
+<ul>
+<li>TXTNAM (F3B3H) for the pattern name table</li>
+<li>TXTCGP (F3B7H) for the pattern generator table</li>
+<li>LINL40 (F3AEH) for the length of one line</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="init32-00d9h">INIT32 (00D9H)</h4>
+<ul>
+<li><strong>Function</strong>: initialises the screen to GRAPHIC1 mode
+(32x24)</li>
+<li><strong>Input</strong>:
+<ul>
+<li>T32NAM (F3BDH) for the pattern name table</li>
+<li>T32COL (F3BFH) for the colour table</li>
+<li>T32CGP (F3C1H) for the pattern generator table</li>
+<li>T32ATR (F3C3H) for the sprite attribute table</li>
+<li>T32PAT (F3C5H) for the sprite generator table</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="inigrp-00ddh">INIGRP (00DDH)</h4>
+<ul>
+<li><strong>Function</strong>: initialises the screen to the
+high-resolution graphics mode</li>
+<li><strong>Input</strong>:
+<ul>
+<li>GRPNAM (F3C7H) for the pattern name table</li>
+<li>GRPCOL (F3C9H) for the colour table</li>
+<li>GRPCGP (F3CBH) for the pattern generator table</li>
+<li>GRPATR (F3CDH) for the sprite attribute table</li>
+<li>GRPPAT (F3CFH) for the sprite generator table</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="inimlt-00e1h">INIMLT (00E1H)</h4>
+<ul>
+<li><strong>Function</strong>: initialises the screen to MULTI colour
+mode</li>
+<li><strong>Input</strong>:
+<ul>
+<li>MLTNAM (F3D1H) for the pattern name table</li>
+<li>MLTCOL (F3D3H) for the colour table</li>
+<li>MLTCGP (F3D5H) for the pattern generator table</li>
+<li>MLTATR (F3D7H) for the sprite attribute table</li>
+<li>MLTPAT (F3D9H) for the sprite generator table</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="settxt-00e5h">SETTXT (00E5H)</h4>
+<ul>
+<li><strong>Function</strong>: sets VDP in the text mode (40x24)</li>
+<li><strong>Input</strong>: same as <a
+href="#initxt-00d5h">INITXT</a></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="sett32-00e9h">SETT32 (00E9H)</h4>
+<ul>
+<li><strong>Function</strong>: ses VDP in the text mode (32x24)</li>
+<li><strong>Input</strong>: same as <a
+href="#init32-00d9h">INIT32</a></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="setgrp-00edh">SETGRP (00EDH)</h4>
+<ul>
+<li><strong>Function</strong>: sets VDP in the high-resolution mode</li>
+<li><strong>Input</strong>: same as <a
+href="#inigrp-00ddh">INIGRP</a></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="setmlt-00f1h">SETMLT (00F1H)</h4>
+<ul>
+<li><strong>Function</strong>: sets VDP in MULTI COLOUR mode</li>
+<li><strong>Input</strong>: same as <a
+href="#inimlt-00e1h">INIMLT</a></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="clrspr-00f5h">CLRSPR (00F5H)</h4>
+<ul>
+<li><strong>Function</strong>: initialises all sprites. The sprite
+pattern is set to null, sprite number to sprite plane number, and sprite
+colour to the foreground colour. The vertical location of the sprite is
+set to 217.</li>
+<li><strong>Input</strong>: SCRMOD (FCAFH) for the screen mode</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="calpat-00f9h">CALPAT (00F9H)</h4>
+<ul>
+<li><strong>Function</strong>: returns the address of the sprite
+generator table (this routine is the same as <a
+href="#calpat-0084h-1">CALPAT</a> in MAIN-ROM)</li>
+<li><strong>Input</strong>: A for the sprite number</li>
+<li><strong>Output</strong>: HL for the address</li>
+<li><strong>Registers</strong>: AF, DE, HL</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="calatr-00fdh">CALATR (00FDH)</h4>
+<ul>
+<li><strong>Function</strong>: returns the address of the sprite
+attribute table (this routine is the same as <a
+href="#calatr-0087h-1">CALATR</a> in MAIN-ROM)</li>
+<li><strong>Input</strong>: A for the sprite number</li>
+<li><strong>Output</strong>: HL for the address</li>
+<li><strong>Registers</strong>: AF, DE, HL</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="gspsiz-0101h">GSPSIZ (0101H)</h4>
+<ul>
+<li><strong>Function</strong>: returns the current sprite size (this
+routine is the same as <a href="#gspsiz-008ah-1">GSPSIZ</a> in
+MAIN-ROM)</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: A for the sprite size. The CY flag is set
+only for the size 16 x 16.</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="getpat-0105h">GETPAT (0105H)</h4>
+<ul>
+<li><strong>Function</strong>: returns the character pattern</li>
+<li><strong>Input</strong>: A for the character code</li>
+<li><strong>Output</strong>: PATWRK (FC40H) for the character
+pattern</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="wrtvrm-0109h">WRTVRM (0109H)</h4>
+<ul>
+<li><strong>Function</strong>: writes data in VRAM</li>
+<li><strong>Input</strong>: HL for VRAM address (0 TO FFFFH), A for
+data</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="rdvrm-010dh">RDVRM (010DH)</h4>
+<ul>
+<li><strong>Function</strong>: reads the contents of VRAM</li>
+<li><strong>Input</strong>: HL for VRAM address (0 TO FFFFH) to be
+read</li>
+<li><strong>Output</strong>: A for the value which was read</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="chgclr-0111h">CHGCLR (0111H)</h4>
+<ul>
+<li><strong>Function</strong>: changes the screen colour</li>
+<li><strong>Input</strong>:
+<ul>
+<li>A for the mode</li>
+<li>FORCLR (F3E9H) for the foreground color</li>
+<li>BAKCLR (F3EAH) for the background color</li>
+<li>BDRCLR (F3EBH) for the border colour</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="clssub-0115h">CLSSUB (0115H)</h4>
+<ul>
+<li><strong>Function</strong>: clears the screen</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="dspfnk-011dh">DSPFNK (011DH)</h4>
+<ul>
+<li><strong>Function</strong>: displays the function keys</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="wrtvdp-012dh">WRTVDP (012DH)</h4>
+<ul>
+<li><strong>Function</strong>: writes data in the VDP register</li>
+<li><strong>Input</strong>: C for the register number, B for data</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF, BC</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="vdpsta-0131h">VDPSTA (0131H)</h4>
+<ul>
+<li><strong>Function</strong>: reads the VDP register</li>
+<li><strong>Input</strong>: A for the register number (0 to 9)</li>
+<li><strong>Output</strong>: A for data</li>
+<li><strong>Registers</strong>: F</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="setpag-013dh">SETPAG (013DH)</h4>
+<ul>
+<li><strong>Function</strong>: switches the page</li>
+<li><strong>Input</strong>:
+<ul>
+<li>DPPAGE (FAF5H) for the display page number</li>
+<li>ACPAGE (FAF6H) for the active page number</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="iniplt-0141h">INIPLT (0141H)</h4>
+<ul>
+<li><strong>Function</strong>: initialises the palette (the current
+palette is saved in VRAM)</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF, BC, DE</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="rstplt-0145h">RSTPLT (0145H)</h4>
+<ul>
+<li><strong>Function</strong>: restores the palette from VRAM</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF, BC, DE</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="getplt-0149h">GETPLT (0149H)</h4>
+<ul>
+<li><strong>Function</strong>: obtains the colour code from the
+palette</li>
+<li><strong>Input</strong>: A for the palette number (0 to 15)</li>
+<li><strong>Output</strong>:
+<ul>
+<li>4 high order bits of B for red code</li>
+<li>4 low order bits of B for blue code</li>
+<li>4 low order bits of C for green code</li>
+</ul></li>
+<li><strong>Registers</strong>: AF, DE</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="setplt-014dh">SETPLT (014DH)</h4>
+<ul>
+<li><strong>Function</strong>: sets the colour code to the palette</li>
+<li><strong>Input</strong>:
+<ul>
+<li>D for the palette number (0 to 15)</li>
+<li>4 high order bits of A for red code</li>
+<li>4 low order bits of A for blue code</li>
+<li>4 low order bits of E for green code</li>
+</ul></li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: AF</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="beep-017dh">BEEP (017DH)</h4>
+<ul>
+<li><strong>Function</strong>: generates BEEP</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="prompt-0181h">PROMPT (0181H)</h4>
+<ul>
+<li><strong>Function</strong>: displays the prompt</li>
+<li><strong>Input</strong>: none</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="newpad-01adh">NEWPAD (01ADH)</h4>
+<ul>
+<li><strong>Function</strong>: reads the status of mouse or light
+pen</li>
+<li><strong>Input</strong>: call with setting the following data in A;
+descriptions in parenthesis are return values.
+<ul>
+<li>8: light pen check (valid at 0FFH)</li>
+<li>9: returns X-coordinate</li>
+<li>10: returns Y-coordinate</li>
+<li>11: returns the light pen switch status (0FFH, when pressed)</li>
+<li>12: whether the mouse is connected to the port 1 (valid at
+0FFH)</li>
+<li>13: returns the offset in X direction</li>
+<li>14: returns the offset in Y direction</li>
+<li>15: (always 0)</li>
+<li>16: whether the mouse is connected to the port 2 (valid at
+0FFH)</li>
+<li>17: returns the offset in X direction</li>
+<li>18: returns the offset in Y direction</li>
+<li>19: (always 0)</li>
+</ul></li>
+<li><strong>Output</strong>: A</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="chgmdp-01b5h">CHGMDP (01B5H)</h4>
+<ul>
+<li><strong>Function</strong>: changes VDP mode. The palette is
+initialised.</li>
+<li><strong>Input</strong>: A for the screen mode (0 to 8)</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: all</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="knjprt-01bdh">KNJPRT (01BDH)</h4>
+<ul>
+<li><strong>Function</strong>: sends a kanki to the graphic screen
+(modes 5 to 8)</li>
+<li><strong>Input</strong>: BC for JIS kanji code, A for the display
+mode. The display mode has the following meaning, similar to the PUT
+KANJI command of BASIC.
+<ul>
+<li>0: display in 16 x 16 dot</li>
+<li>1: display even dots</li>
+<li>2: display odd dots</li>
+</ul></li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="redclk-01f5h">REDCLK (01F5H)</h4>
+<ul>
+<li><strong>Function</strong>: reads the clock data</li>
+<li><strong>Input</strong>: C for RAM address of the clock</li>
+</ul>
+<pre><code>  00MMAAAA
+    ------
+    ||++++--- Address (0 to 15)
+    ++------- Mode (0 to 3)</code></pre>
+<ul>
+<li><strong>Output</strong>: A for the data which were read (only 4 low
+order bits are valid)</li>
+<li><strong>Registers</strong>: F</li>
+</ul>
+<p>
+ 
+</p>
+<h4 id="wrtclk-01f9h">WRTCLK (01F9H)</h4>
+<ul>
+<li><strong>Function</strong>: writes the clock data</li>
+<li><strong>Input</strong>: A for the data to be written, C for RAM
+address of the clock</li>
+<li><strong>Output</strong>: none</li>
+<li><strong>Registers</strong>: F</li>
+</ul>
+<p>
+ 
+</p>
+<h2 id="changes-from-the-original">Changes from the original</h2>
+<ul>
+<li><p>In description of <a href="#enaslt-0024h-1">ENASLT</a>, the
+needed input in HL has been added.</p></li>
+<li><p>In description of <a href="#getypr-0028h-1">GETYPR</a>, the Input
+field has been added.</p></li>
+<li><p>In description of <a href="#initxt-006ch-3">INITXT</a> (MAIN),
+the reference to “INIPLOT” has been corrected to “<a
+href="#iniplt-0141h">INIPLT</a>”.</p></li>
+<li><p>In description of <a href="#subrom-015ch">SUBROM</a> routine, the
+mark “*1” has been erased.</p></li>
+<li><p>In description of <a href="#initxt-006ch-3">INITXT</a> (SUB), the
+needed input in LINL40 has been added.</p></li>
+<li><p>Description of <a href="#phydio-0144h">PHYDIO</a> routine has
+been added.</p></li>
+</ul>
